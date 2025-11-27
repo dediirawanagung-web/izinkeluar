@@ -8,8 +8,8 @@
       --primary-color: rgba(255, 105, 180, 0.9);
       --primary-light: rgba(255, 105, 180, 0.7);
       --primary-dark: rgba(255, 105, 180, 0.3);
-      --text-color: rgba(255, 255, 255, 1); /* Diubah ke putih solid */
-      --text-secondary: rgba(255, 255, 255, 0.9); /* Diubah lebih terang */
+      --text-color: rgba(255, 255, 255, 1);
+      --text-secondary: rgba(255, 255, 255, 0.9);
       --bg-dark: rgba(18, 18, 18, 0.2);
       --card-bg: rgba(30, 30, 30, 0.15);
       --input-bg: rgba(45, 45, 45, 0.15);
@@ -23,7 +23,7 @@
       max-width: 500px;
       margin: 0 auto;
       padding: 20px;
-      color: white; /* Diubah ke putih */
+      color: white;
       background-image: url('https://i.pinimg.com/736x/0d/4b/2f/0d4b2f444ea82b8790fbf0e6db622ee9.jpg');
       background-size: cover;
       background-position: center;
@@ -45,18 +45,18 @@
       margin-bottom: 20px;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     h1 {
-      color: white; /* Diubah ke putih */
+      color: white;
       margin-bottom: 15px;
       font-size: 24px;
       font-weight: 600;
       letter-spacing: 0.5px;
       position: relative;
       display: inline-block;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Diubah ke putih */
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
     }
     
     h1::after {
@@ -66,26 +66,22 @@
       left: 0;
       width: 100%;
       height: 2px;
-      background: linear-gradient(90deg, transparent, white, transparent); /* Diubah ke putih */
+      background: linear-gradient(90deg, transparent, white, transparent);
       animation: blinkGlow 3s infinite ease-in-out;
     }
     
     @keyframes blinkGlow {
-      0%, 100% {
-        opacity: 0.5;
-      }
-      50% {
-        opacity: 0.9;
-      }
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.9; }
     }
     
     #digitalClock, #digitalClockApp {
       font-size: 36px;
       font-family: 'Orbitron', 'Courier New', monospace;
-      color: white; /* Diubah ke putih */
+      color: white;
       margin: 15px 0;
       font-weight: bold;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4); /* Diubah ke putih */
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
       letter-spacing: 2px;
     }
     
@@ -93,8 +89,8 @@
       font-size: 28px;
       font-family: 'Orbitron', 'Courier New', monospace;
       margin: 20px 0;
-      color: white; /* Diubah ke putih */
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Diubah ke putih */
+      color: white;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
       letter-spacing: 1px;
       min-height: 36px;
     }
@@ -109,7 +105,7 @@
     button {
       width: 100%;
       background: linear-gradient(45deg, rgba(255, 105, 180, 0.2), rgba(255, 105, 180, 0.4));
-      color: white; /* Diubah ke putih */
+      color: white;
       border: 1px solid rgba(255, 105, 180, 0.3);
       padding: 12px;
       border-radius: 8px;
@@ -132,13 +128,13 @@
       opacity: 0.6;
       cursor: not-allowed;
       background: rgba(68, 68, 68, 0.3);
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     .logout-btn {
       background: rgba(255, 105, 180, 0.1);
       border: 1px solid rgba(255, 105, 180, 0.4);
-      color: white; /* Diubah ke putih */
+      color: white;
       transition: all 0.3s ease;
       width: auto;
       padding: 8px 20px;
@@ -156,14 +152,12 @@
       box-shadow: 0 5px 15px rgba(255, 105, 180, 0.2);
     }
     
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
     
     .welcome-message {
       font-size: 16px;
       margin: 10px 0 20px;
-      color: white; /* Diubah ke putih */
+      color: white;
       font-weight: 500;
     }
     
@@ -176,7 +170,7 @@
       display: block;
       margin-bottom: 6px;
       font-size: 14px;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     input {
@@ -186,39 +180,35 @@
       border: 1px solid var(--border-color);
       border-radius: 7px;
       font-size: 14px;
-      color: white; /* Diubah ke putih */
+      color: white;
       transition: all 0.3s;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
     }
     
-    input::placeholder {
-      color: rgba(255, 255, 255, 0.7); /* Diubah lebih terang */
-    }
+    input::placeholder { color: rgba(255, 255, 255, 0.7); }
     
     input:focus {
       outline: none;
-      border-color: white; /* Diubah ke putih */
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); /* Diubah ke putih */
+      border-color: white;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
     }
     
     .switch-form {
       margin-top: 16px;
-      color: white; /* Diubah ke putih */
+      color: white;
       font-size: 13px;
     }
     
     .switch-form a {
-      color: white; /* Diubah ke putih */
+      color: white;
       text-decoration: none;
       font-weight: 600;
       cursor: pointer;
       opacity: 0.9;
     }
     
-    .switch-form a:hover {
-      text-decoration: underline;
-    }
+    .switch-form a:hover { text-decoration: underline; }
     
     .message {
       padding: 12px;
@@ -228,18 +218,18 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid transparent;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     .error-message {
       background-color: rgba(255, 68, 68, 0.1);
-      color: white; /* Diubah ke putih */
+      color: white;
       border-color: var(--error-color) !important;
     }
     
     .success-message {
       background-color: rgba(0, 200, 81, 0.1);
-      color: white; /* Diubah ke putih */
+      color: white;
       border-color: var(--success-color) !important;
     }
     
@@ -253,10 +243,9 @@
       background-color: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
-    /* Dashboard Styles */
     .dashboard {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -274,7 +263,7 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid var(--border-color);
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     .dashboard-card:hover {
@@ -283,27 +272,10 @@
       background-color: rgba(45, 45, 45, 0.25);
     }
     
-    .card-title {
-      font-size: 14px;
-      color: white; /* Diubah ke putih */
-      margin-bottom: 8px;
-      opacity: 0.9;
-    }
+    .card-title { font-size: 14px; color: white; margin-bottom: 8px; opacity: 0.9; }
+    .card-value { font-size: 18px; font-weight: 600; color: white; }
+    .card-detail { font-size: 12px; color: white; margin-top: 5px; opacity: 0.8; }
     
-    .card-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: white; /* Diubah ke putih */
-    }
-    
-    .card-detail {
-      font-size: 12px;
-      color: white; /* Diubah ke putih */
-      margin-top: 5px;
-      opacity: 0.8;
-    }
-    
-    /* Password Strength */
     .password-strength {
       font-size: 12px;
       margin-top: 5px;
@@ -311,30 +283,15 @@
       border-radius: 3px;
       backdrop-filter: blur(5px);
       display: inline-block;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
-    .strength-weak {
-      color: white; /* Diubah ke putih */
-      background: rgba(255, 68, 68, 0.3);
-    }
+    .strength-weak { color: white; background: rgba(255, 68, 68, 0.3); }
+    .strength-medium { color: white; background: rgba(255, 165, 0, 0.3); }
+    .strength-strong { color: white; background: rgba(0, 200, 81, 0.3); }
     
-    .strength-medium {
-      color: white; /* Diubah ke putih */
-      background: rgba(255, 165, 0, 0.3);
-    }
+    #printContainer { display: none; }
     
-    .strength-strong {
-      color: white; /* Diubah ke putih */
-      background: rgba(0, 200, 81, 0.3);
-    }
-    
-    /* Print Styles */
-    #printContainer {
-      display: none;
-    }
-    
-    /* Table Styles */
     #historyContainer table {
       width: 100%;
       border-collapse: collapse;
@@ -342,12 +299,12 @@
       background-color: rgba(30, 30, 30, 0.2);
       border: 1px solid rgba(255, 105, 180, 0.2);
       animation: tableGlow 3s infinite ease-in-out;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     #historyContainer th {
       background-color: rgba(255, 105, 180, 0.15);
-      color: white !important; /* Diubah ke putih */
+      color: white !important;
       padding: 8px;
       text-align: left;
       border-bottom: 2px solid rgba(255, 105, 180, 0.5);
@@ -358,48 +315,27 @@
       padding: 8px;
       border: 1px solid rgba(255, 105, 180, 0.3);
       animation: tdGlow 3s infinite ease-in-out;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
-    #historyContainer tr:nth-child(even) {
-      background-color: rgba(255, 105, 180, 0.03);
-    }
+    #historyContainer tr:nth-child(even) { background-color: rgba(255, 105, 180, 0.03); }
+    #historyContainer tr:hover { background-color: rgba(255, 105, 180, 0.1) !important; }
     
-    #historyContainer tr:hover {
-      background-color: rgba(255, 105, 180, 0.1) !important;
-    }
-    
-    /* Animasi untuk tabel */
     @keyframes tableGlow {
-      0%, 100% {
-        border-color: rgba(255, 105, 180, 0.3);
-        box-shadow: 0 0 5px rgba(255, 105, 180, 0.1);
-      }
-      50% {
-        border-color: rgba(255, 105, 180, 0.8);
-        box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
-      }
+      0%, 100% { border-color: rgba(255, 105, 180, 0.3); box-shadow: 0 0 5px rgba(255, 105, 180, 0.1); }
+      50% { border-color: rgba(255, 105, 180, 0.8); box-shadow: 0 0 15px rgba(255, 105, 180, 0.3); }
     }
     
     @keyframes thGlow {
-      0%, 100% {
-        border-bottom-color: rgba(255, 105, 180, 0.3);
-      }
-      50% {
-        border-bottom-color: rgba(255, 105, 180, 0.8);
-      }
+      0%, 100% { border-bottom-color: rgba(255, 105, 180, 0.3); }
+      50% { border-bottom-color: rgba(255, 105, 180, 0.8); }
     }
     
     @keyframes tdGlow {
-      0%, 100% {
-        border-color: rgba(255, 105, 180, 0.2);
-      }
-      50% {
-        border-color: rgba(255, 105, 180, 0.5);
-      }
+      0%, 100% { border-color: rgba(255, 105, 180, 0.2); }
+      50% { border-color: rgba(255, 105, 180, 0.5); }
     }
     
-    /* Print Table */
     .print-table {
       width: 100%;
       border-collapse: collapse;
@@ -407,12 +343,12 @@
       background-color: rgba(30, 30, 30, 0.7) !important;
       border: 1px solid var(--primary-color) !important;
       animation: tableGlow 3s infinite ease-in-out;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
     .print-table th {
       background-color: rgba(255, 105, 180, 0.3) !important;
-      color: white !important; /* Diubah ke putih */
+      color: white !important;
       border-bottom: 2px solid var(--primary-color) !important;
       animation: thGlow 3s infinite ease-in-out;
     }
@@ -420,86 +356,36 @@
     .print-table td {
       border: 1px solid rgba(255, 105, 180, 0.2) !important;
       animation: tdGlow 3s infinite ease-in-out;
-      color: white; /* Diubah ke putih */
+      color: white;
     }
     
-    .print-table tr:nth-child(even) {
-      background-color: rgba(255, 105, 180, 0.05) !important;
-    }
+    .print-table tr:nth-child(even) { background-color: rgba(255, 105, 180, 0.05) !important; }
     
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printContainer, #printContainer * {
-        visibility: visible;
-      }
-      #printContainer {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 20px;
-        color: black; /* Tetap hitam untuk print */
-      }
-      .print-header {
-        text-align: center;
-        margin-bottom: 20px;
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 10px;
-        color: black; /* Tetap hitam untuk print */
-      }
-      .print-table th, .print-table td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-        color: black; /* Tetap hitam untuk print */
-      }
-      .print-table th {
-        background-color: var(--primary-dark);
-        color: black !important; /* Tetap hitam untuk print */
-      }
-      .print-table tr:nth-child(even) {
-        background-color: #f2f2f2;
-      }
-      .no-print {
-        display: none;
-      }
+      body * { visibility: hidden; }
+      #printContainer, #printContainer * { visibility: visible; }
+      #printContainer { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: black; }
+      .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; color: black; }
+      .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; text-align: left; color: black; }
+      .print-table th { background-color: var(--primary-dark); color: black !important; }
+      .print-table tr:nth-child(even) { background-color: #f2f2f2; }
+      .no-print { display: none; }
     }
     
     @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-      
-      .container {
-        padding: 15px;
-      }
-      
-      h1 {
-        font-size: 20px;
-      }
-      
-      #digitalClock, #digitalClockApp {
-        font-size: 28px;
-      }
-      
-      #timerDisplay {
-        font-size: 24px;
-      }
-      
-      .dashboard {
-        grid-template-columns: 1fr;
-      }
+      body { padding: 10px; }
+      .container { padding: 15px; }
+      h1 { font-size: 20px; }
+      #digitalClock, #digitalClockApp { font-size: 28px; }
+      #timerDisplay { font-size: 24px; }
+      .dashboard { grid-template-columns: 1fr; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Konten HTML tetap sama seperti sebelumnya -->
   <div id="mainContainer">
-    <!-- Halaman Login/Daftar -->
     <div id="authContainer" class="container">
       <h1>LOGIN JAM IZIN KELUAR</h1>
       <div id="digitalClock"></div>
@@ -516,37 +402,11 @@
         </div>
         <button onclick="login()">Login</button>
         <div class="switch-form">
-          Belum punya akun? <a onclick="showRegister()">Daftar disini</a>
-        </div>
-      </div>
-      
-      <div id="registerTab" class="hidden">
-        <div id="registerMessage" class="message hidden"></div>
-        <div class="form-group">
-          <label for="regName">Nama Lengkap:</label>
-          <input type="text" id="regName" required placeholder="Masukkan nama lengkap">
-        </div>
-        <div class="form-group">
-          <label for="regEmail">Email:</label>
-          <input type="email" id="regEmail" required placeholder="Masukkan email valid">
-        </div>
-        <div class="form-group">
-          <label for="regPassword">Password:</label>
-          <input type="password" id="regPassword" required placeholder="Minimal 6 karakter" oninput="checkPasswordStrength()">
-          <div id="passwordStrength" class="password-strength hidden"></div>
-        </div>
-        <div class="form-group">
-          <label for="regConfirmPassword">Konfirmasi Password:</label>
-          <input type="password" id="regConfirmPassword" required placeholder="Ketik ulang password">
-        </div>
-        <button onclick="register()">Daftar</button>
-        <div class="switch-form">
-          Sudah punya akun? <a onclick="showLogin()">Login disini</a>
+          Gunakan email dari daftar staf dan password <strong>admin123</strong>
         </div>
       </div>
     </div>
     
-    <!-- Halaman Aplikasi Utama -->
     <div id="appContainer" class="container hidden">
       <h1>JAM IZIN KELUAR</h1>
       <div id="digitalClockApp"></div>
@@ -574,12 +434,9 @@
       </button>
     </div>
     
-    <!-- Halaman Ganti Password -->
     <div id="changePasswordContainer" class="container hidden">
       <h1>GANTI PASSWORD</h1>
-      
       <div class="welcome-message">Anda sedang mengganti password untuk: <span id="changePasswordEmail"></span></div>
-      
       <div id="changePasswordForm">
         <div id="changePasswordMessage" class="message hidden"></div>
         <div class="form-group">
@@ -595,19 +452,16 @@
           <label for="confirmNewPassword">Konfirmasi Password Baru:</label>
           <input type="password" id="confirmNewPassword" required placeholder="Ketik ulang password baru">
         </div>
-        
         <div class="button-row">
           <button onclick="processChangePassword()"><i class="fas fa-save"></i> Simpan Password Baru</button>
           <button onclick="backToApp()" style="background: rgba(255, 68, 68, 0.3); border-color: rgba(255, 68, 68, 0.5);"><i class="fas fa-times"></i> Kembali</button>
         </div>
       </div>
-      
       <button class="logout-btn" onclick="logout()" style="margin-top: 30px;">
         <i class="fas fa-sign-out-alt"></i> Logout
       </button>
     </div>
     
-    <!-- Print Container (hidden by default) -->
     <div id="printContainer">
       <div class="print-header">
         <h2>Laporan Izin Keluar</h2>
@@ -623,69 +477,97 @@
             <th>Durasi</th>
           </tr>
         </thead>
-        <tbody id="printHistoryBody">
-        </tbody>
+        <tbody id="printHistoryBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Script JavaScript tetap sama seperti sebelumnya -->
   <script>
-    // Variabel global
+    // --- DATABASE LOKAL (localStorage) ---
+    const DB_USERS_KEY = 'izinKeluarUsers';
+    const DB_HISTORY_KEY = 'izinKeluarHistory';
+    const APP_STATE_KEY = 'izinKeluarAppState';
+
+    // Inisialisasi database pengguna jika belum ada
+    function initializeUserDatabase() {
+        if (!localStorage.getItem(DB_USERS_KEY)) {
+            const defaultUsers = {
+                'widjaya88.smb88@gmail.com': { name: 'WIDJAYA', password: 'admin123' },
+                'david.smb9856@gmail.com': { name: 'DAVID', password: 'admin123' },
+                'charlie454506@gmail.com': { name: 'CHARLIE', password: 'admin123' },
+                'hariantohari6036@gmail.com': { name: 'HARIANTO', password: 'admin123' },
+                'rinalabdilah.smb88@gmail.com': { name: 'RINAL ABDILLAH NASUTION', password: 'admin123' },
+                'erihari391@gmail.com': { name: 'ERI HARIANTO', password: 'admin123' },
+                'mahendranmahh2388@gmail.com': { name: 'MAHENDRAN', password: 'admin123' },
+                'tommyhasim2304@gmail.com': { name: 'TOMMY HASIM', password: 'admin123' },
+                'ranjit230422@gmail.com': { name: 'RANJIT', password: 'admin123' },
+                'willyperayuda7789@gmail.com': { name: 'WILLY PERAYUDA', password: 'admin123' },
+                'andibaru536@gmail.com': { name: 'ANDI', password: 'admin123' },
+                'alfinomuk3256@gmail.com': { name: 'ALFINO MUKTI', password: 'admin123' },
+                'akasfarm87663@gmail.com': { name: 'AKAS FARMA', password: 'admin123' },
+                'ariromandus12@gmail.com': { name: 'ARI ROMANDUS FERNAND', password: 'admin123' },
+                'parisamrulloh26885@gmail.com': { name: 'PARIS AMRULLOH', password: 'admin123' },
+                'samsulma874@gmail.com': { name: 'SAMSUL MAARIF', password: 'admin123' },
+                'razzsuhan@gmail.com': { name: 'SUHAN RAZ', password: 'admin123' },
+                'rahmadisormi.smb888@gmail.com': { name: 'RAHMADI SORMIN', password: 'admin123' },
+                'novalmuttawali354@gmail.com': { name: 'NOVAL MUTTAWALI HAKIM', password: 'admin123' },
+                'putraanugrahrizki76@gmail.com': { name: 'PUTRA ANUGRAH RIZKI', password: 'admin123' },
+                'iamwil220@gmail.com': { name: 'WILIAM', password: 'admin123' },
+                'pramdhani086@gmail.com': { name: 'PUTRA RAMADHANI', password: 'admin123' },
+                'fiqalkana6@gmail.com': { name: 'FIQAL KANA', password: 'admin123' },
+                'marjokisang.smb88@gmail.com': { name: 'MARJOKI SANG', password: 'admin123' },
+                'danielsmb385@gmail.com': { name: 'DANIEL', password: 'admin123' },
+                'raazjesen88.smb88@gmail.com': { name: 'RAAZ JESEN STEPANUS', password: 'admin123' },
+                'mahatsanjayahrp@gmail.com': { name: 'MAHAT SANJAYA HARAHAP', password: 'admin123' },
+                'aamrul568@gmail.com': { name: 'AMRUL', password: 'admin123' },
+                'jonromanpurba0305@gmail.com': { name: 'JONROMAN PURBA', password: 'admin123' },
+                'annen.smb88@gmail.com': { name: 'ANNEN', password: 'admin123' },
+                'mfajjarsiddik69@gmail.com': { name: 'M FAJAR SIDDIK', password: 'admin123' },
+                'bobykasandrabancin@gmail.com': { name: 'BOBY KASANDRA BANCIN', password: 'admin123' },
+                'kikiyunita523@gmail.com': { name: 'KIKI YUNITA', password: 'admin123' },
+                'galit8158@gmail.com': { name: 'GALI PRATAMA', password: 'admin123' },
+                'primanugraha428@gmail.com': { name: 'PRIMA NUGRAHA', password: 'admin123' },
+                'roydilensmb@gmail.com': { name: 'ROY DILEN', password: 'admin123' },
+                'ridzkyramadhan550@gmail.com': { name: 'RIDZKY RAMADHAN', password: 'admin123' },
+                'dediirawanagung@gmail.com': { name: 'AGUNG DEDI IRAWAN', password: 'admin123' },
+                'maiceltampu210424@gmail.com': { name: 'MAICEL TAMPUBOLON', password: 'admin123' },
+                'adechairunis260424@gmail.com': { name: 'ADE CHAIRUNNISA', password: 'admin123' },
+                'rezisyaputrasmb@gmail.com': { name: 'M REZI SYAPUTRA', password: 'admin123' },
+                'khoiruddin1317@gmail.com': { name: 'KHOIRUDDIN', password: 'admin123' },
+                'bambangagungsutrisno@gmail.com': { name: 'BAMBANG AGUNG SUTRISNO', password: 'admin123' },
+                'putrainsany21@gmail.com': { name: 'PUTRA INSANY', password: 'admin123' },
+                'ferasalmake2@gmail.com': { name: 'FERA SALMA', password: 'admin123' },
+                'rizkyrivlan@gmail.com': { name: 'RIVLAN RIZKY', password: 'admin123' },
+                'saidmaulanaali90@gmail.com': { name: 'MAULANA ALI SAID', password: 'admin123' },
+                'ahmadandika.smb88@gmail.com': { name: 'AHMAD ANDIKA', password: 'admin123' },
+                'ksanggara757@gmail.com': { name: 'ANGGARA K S', password: 'admin123' },
+                'dimasadhitya127@gmail.com': { name: 'DIMAS ADHITYA', password: 'admin123' },
+                'egaprayuda877@gmail.com': { name: 'EGA PRAYUDA', password: 'admin123' },
+                'arjunpraisya066@gmail.com': { name: 'ARJUN PRAISYA', password: 'admin123' },
+                'panca9244@gmail.com': { name: 'ADITYA PANCA', password: 'admin123' },
+                'audisoyong@gmail.com': { name: 'AUDIS OYONG DUANSYAH', password: 'admin123' },
+                'ojia43949@gmail.com': { name: 'ADE OJI SHAPUTRA', password: 'admin123' },
+                'alfiansyah556677@gmail.com': { name: 'ALFIANSYAH', password: 'admin123' },
+                'andyputra556677@gmail.com': { name: 'ANDY PUTRA', password: 'admin123' },
+                'junitamarsha96@gmail.com': { name: 'JUNITA MARSHA', password: 'admin123' },
+                'melaniputritrinita25@gmail.com': { name: 'MELAN PUTRI TRINITA', password: 'admin123' },
+                'syarifahrumiatiastari2807@gmail.com': { name: 'SYARIFAH RUMIATI ASTARI', password: 'admin123' },
+                'perdanaputra00711@gmail.com': { name: 'PERDANA PUTRA', password: 'admin123' },
+                'gunawan87smb@gmail.com': { name: 'GUNAWAN', password: 'admin123' },
+                'mayamarsela47@gmail.com': { name: 'MAYA MARSELA', password: 'admin123' }
+            };
+            localStorage.setItem(DB_USERS_KEY, JSON.stringify(defaultUsers));
+        }
+    }
+
+    // --- VARIABEL GLOBAL ---
     let timerInterval;
     let startTime;
     let isTimerRunning = false;
     let currentUser = null;
     let historyLoaded = false;
 
-    // Fungsi untuk menyimpan state ke localStorage
-    function saveAppState() {
-      if (currentUser) {
-        const state = {
-          userEmail: currentUser.email,
-          userName: currentUser.name,
-          isTimerRunning,
-          startTime: isTimerRunning ? startTime.getTime() : null
-        };
-        localStorage.setItem('izinKeluarAppState', JSON.stringify(state));
-      }
-    }
-
-    // Fungsi untuk memuat state dari localStorage
-    function loadAppState() {
-      const savedState = localStorage.getItem('izinKeluarAppState');
-      if (savedState) {
-        const state = JSON.parse(savedState);
-        
-        if (state.isTimerRunning && state.startTime) {
-          startTime = new Date(state.startTime);
-          isTimerRunning = true;
-          timerInterval = setInterval(updateTimerDisplay, 1000);
-          document.getElementById('startBtn').disabled = true;
-          document.getElementById('endBtn').disabled = false;
-          
-          // Hitung waktu yang sudah berlalu
-          const now = new Date();
-          const elapsed = now - startTime;
-          document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
-        }
-      }
-    }
-
-    // Fungsi untuk membersihkan state
-    function clearAppState() {
-      localStorage.removeItem('izinKeluarAppState');
-    }
-
-    // Update jam digital
-    function updateDigitalClock() {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('id-ID', {hour12: false});
-      document.getElementById('digitalClock').textContent = timeString;
-      document.getElementById('digitalClockApp').textContent = timeString;
-    }
-
-    // Format durasi HH:MM:SS
+    // --- FUNGSI HELPER ---
     function formatDuration(ms) {
       const totalSeconds = Math.floor(ms / 1000);
       const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
@@ -694,83 +576,153 @@
       return `${hours}:${minutes}:${seconds}`;
     }
 
-    // Format tanggal dan waktu
     function formatDateTime(date) {
       const pad = num => num.toString().padStart(2, '0');
       return `${pad(date.getDate())}/${pad(date.getMonth()+1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
     }
 
-    // Update timer display
+    function showMessage(element, message, type) {
+      element.textContent = message;
+      element.className = `message ${type}-message`;
+      element.classList.remove('hidden');
+      setTimeout(() => element.classList.add('hidden'), 5000);
+    }
+    
+    function showAppMessage(message, type) {
+      const messageElement = document.createElement('div');
+      messageElement.className = `message ${type}-message`;
+      messageElement.textContent = message;
+      const appContainer = document.getElementById('appContainer');
+      appContainer.insertBefore(messageElement, appContainer.firstChild);
+      setTimeout(() => messageElement.remove(), 5000);
+    }
+
+    // --- MANAJEMEN STATE APLIKASI ---
+    function saveAppState() {
+      if (currentUser) {
+        const state = {
+          userEmail: currentUser.email,
+          userName: currentUser.name,
+          isTimerRunning,
+          startTime: isTimerRunning ? startTime.getTime() : null
+        };
+        localStorage.setItem(APP_STATE_KEY, JSON.stringify(state));
+      }
+    }
+
+    function loadAppState() {
+      const savedState = localStorage.getItem(APP_STATE_KEY);
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        if (state.isTimerRunning && state.startTime) {
+          startTime = new Date(state.startTime);
+          isTimerRunning = true;
+          timerInterval = setInterval(updateTimerDisplay, 1000);
+          document.getElementById('startBtn').disabled = true;
+          document.getElementById('endBtn').disabled = false;
+          const now = new Date();
+          const elapsed = now - startTime;
+          document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
+        }
+      }
+    }
+
+    function clearAppState() {
+      localStorage.removeItem(APP_STATE_KEY);
+    }
+
+    // --- LOGIKA UTAMA APLIKASI ---
+    function updateDigitalClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('id-ID', {hour12: false});
+      document.getElementById('digitalClock').textContent = timeString;
+      document.getElementById('digitalClockApp').textContent = timeString;
+    }
+
     function updateTimerDisplay() {
       if (!isTimerRunning) return;
-      
       const now = new Date();
       const elapsed = now - startTime;
       document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
     }
 
-    // Mulai timer
     function startTimer() {
       if (isTimerRunning) return;
-      
       startTime = new Date();
       isTimerRunning = true;
       timerInterval = setInterval(updateTimerDisplay, 1000);
       document.getElementById('startBtn').disabled = true;
       document.getElementById('endBtn').disabled = false;
-      
-      // Simpan state
       saveAppState();
       
-      // Simpan waktu mulai ke spreadsheet
-      google.script.run.withSuccessHandler((response) => {
-        console.log('Waktu mulai berhasil disimpan:', response);
-      }).withFailureHandler((error) => {
-        console.error('Gagal menyimpan waktu mulai:', error);
-        showAppMessage('Gagal menyimpan waktu mulai. Silakan coba lagi.', 'error');
-      }).recordStartTime(
-        currentUser.email, 
-        currentUser.name,
-        formatDateTime(startTime)
-      );
+      // Simpan sesi aktif
+      const activeSession = { email: currentUser.email, startTime: formatDateTime(startTime) };
+      localStorage.setItem('activeSession', JSON.stringify(activeSession));
     }
 
-    // Akhiri timer
     function endTimer() {
       if (!isTimerRunning) return;
-      
       clearInterval(timerInterval);
       isTimerRunning = false;
       const endTime = new Date();
       const duration = endTime - startTime;
       
-      // Bersihkan state timer
+      const historyEntry = {
+        email: currentUser.email,
+        name: currentUser.name,
+        startTime: formatDateTime(startTime),
+        endTime: formatDateTime(endTime),
+        duration: formatDuration(duration)
+      };
+
+      let history = JSON.parse(localStorage.getItem(DB_HISTORY_KEY)) || [];
+      history.push(historyEntry);
+      localStorage.setItem(DB_HISTORY_KEY, JSON.stringify(history));
+
+      localStorage.removeItem('activeSession');
       saveAppState();
       
-      // Simpan data ke spreadsheet
-      google.script.run.withSuccessHandler((response) => {
-        console.log('Waktu selesai berhasil disimpan:', response);
-        document.getElementById('timerDisplay').textContent = '00:00:00';
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('endBtn').disabled = true;
-        
-        // Refresh history jika sudah dimuat
-        if (historyLoaded) {
-          loadHistory();
-        }
-      }).withFailureHandler((error) => {
-        console.error('Gagal menyimpan waktu selesai:', error);
-        showAppMessage('Gagal menyimpan waktu selesai. Silakan coba lagi.', 'error');
-      }).recordEndTime(
-        currentUser.email,
-        currentUser.name,
-        formatDateTime(startTime), 
-        formatDateTime(endTime), 
-        formatDuration(duration)
-      );
+      document.getElementById('timerDisplay').textContent = '00:00:00';
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('endBtn').disabled = true;
+      
+      if (historyLoaded) loadHistory();
     }
 
-    // Fungsi login
+    // --- LOGIKA AUTENTIKASI (STANDALONE) ---
+    function loginUser(email, password) {
+      const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
+      const user = users[email];
+      if (user && user.password === password) {
+        return { status: "success", user: { email, name: user.name } };
+      }
+      return { status: "error", message: "Email atau password salah." };
+    }
+
+    function changeUserPassword(email, currentPassword, newPassword) {
+      const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
+      const user = users[email];
+      if (!user || user.password !== currentPassword) {
+        return { status: "error", message: "Password saat ini salah." };
+      }
+      user.password = newPassword;
+      localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
+      return { status: "success", message: "Password berhasil diubah." };
+    }
+
+    function getUserHistory(email) {
+      const allHistory = JSON.parse(localStorage.getItem(DB_HISTORY_KEY)) || [];
+      return allHistory.filter(entry => entry.email === email);
+    }
+
+    function getUnfinishedTimer(email) {
+        const activeSession = JSON.parse(localStorage.getItem('activeSession'));
+        if (activeSession && activeSession.email === email) {
+            return activeSession;
+        }
+        return null;
+    }
+
     function login() {
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value.trim();
@@ -781,393 +733,163 @@
         return;
       }
       
-      // Validasi format email sederhana
-      if (!email.includes('@') || !email.includes('.')) {
-        showMessage(messageElement, 'Format email tidak valid', 'error');
-        return;
-      }
-      
-      showMessage(messageElement, 'Sedang memproses login...', 'success');
-      
-      google.script.run.withSuccessHandler((user) => {
-        if (user && user.email) {
-          currentUser = user;
-          document.getElementById('welcomeMessage').textContent = `Selamat datang, ${user.name || user.email}!`;
-          document.getElementById('authContainer').classList.add('hidden');
-          document.getElementById('appContainer').classList.remove('hidden');
-          
-          // Simpan state
-          saveAppState();
-          
-          // Cek apakah ada timer yang belum selesai
-          checkUnfinishedTimer();
-        } else {
-          showMessage(messageElement, 'Email atau password salah', 'error');
-        }
-      }).withFailureHandler((error) => {
-        console.error('Login error:', error);
-        showMessage(messageElement, 'Terjadi kesalahan saat login', 'error');
-      }).loginUser(email, password);
-    }
-
-    // Fungsi registrasi
-    function register() {
-      const name = document.getElementById('regName').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
-      const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
-      const messageElement = document.getElementById('registerMessage');
-      
-      if (!name || !email || !password || !confirmPassword) {
-        showMessage(messageElement, 'Semua field harus diisi', 'error');
-        return;
-      }
-      
-      if (password.length < 6) {
-        showMessage(messageElement, 'Password minimal 6 karakter', 'error');
-        return;
-      }
-      
-      if (password !== confirmPassword) {
-        showMessage(messageElement, 'Password tidak cocok', 'error');
-        return;
-      }
-      
-      // Validasi format email sederhana
-      if (!email.includes('@') || !email.includes('.')) {
-        showMessage(messageElement, 'Format email tidak valid', 'error');
-        return;
-      }
-      
-      showMessage(messageElement, 'Sedang memproses pendaftaran...', 'success');
-      
-      google.script.run.withSuccessHandler((response) => {
-        if (response.status === "success") {
-          showMessage(messageElement, 'Pendaftaran berhasil! Silakan login.', 'success');
-          showLogin();
-          // Auto-fill email di form login
-          document.getElementById('loginEmail').value = email;
-          document.getElementById('loginPassword').focus();
-        } else {
-          showMessage(messageElement, response.message || 'Gagal mendaftar', 'error');
-        }
-      }).withFailureHandler((error) => {
-        console.error('Registration error:', error);
-        showMessage(messageElement, 'Terjadi kesalahan saat pendaftaran', 'error');
-      }).registerUser(name, email, password);
-    }
-
-    // Cek kekuatan password
-    function checkPasswordStrength() {
-      const password = document.getElementById('regPassword').value;
-      const strengthElement = document.getElementById('passwordStrength');
-      
-      if (!password) {
-        strengthElement.classList.add('hidden');
-        return;
-      }
-      
-      strengthElement.classList.remove('hidden');
-      
-      // Hitung kekuatan password
-      let strength = 0;
-      if (password.length >= 6) strength++;
-      if (password.length >= 8) strength++;
-      if (/[A-Z]/.test(password)) strength++;
-      if (/[0-9]/.test(password)) strength++;
-      if (/[^A-Za-z0-9]/.test(password)) strength++;
-      
-      if (strength <= 2) {
-        strengthElement.textContent = 'Lemah';
-        strengthElement.className = 'password-strength strength-weak';
-      } else if (strength <= 4) {
-        strengthElement.textContent = 'Sedang';
-        strengthElement.className = 'password-strength strength-medium';
+      const response = loginUser(email, password);
+      if (response.status === "success") {
+        currentUser = response.user;
+        document.getElementById('welcomeMessage').textContent = `Selamat datang, ${currentUser.name}!`;
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('appContainer').classList.remove('hidden');
+        saveAppState();
+        checkUnfinishedTimer();
       } else {
-        strengthElement.textContent = 'Kuat';
-        strengthElement.className = 'password-strength strength-strong';
+        showMessage(messageElement, response.message, 'error');
       }
     }
 
-    // Fungsi logout
     function logout() {
       if (isTimerRunning) {
-        const confirmLogout = confirm('Anda memiliki timer yang aktif. Yakin ingin logout?');
-        if (!confirmLogout) return;
+        if (!confirm('Anda memiliki timer yang aktif. Yakin ingin logout?')) return;
         endTimer();
       }
-      
       currentUser = null;
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('changePasswordContainer').classList.add('hidden');
       document.getElementById('authContainer').classList.remove('hidden');
-      showLogin();
       clearFormFields();
-      
-      // Bersihkan state
       clearAppState();
-      
-      // Sembunyikan history jika terbuka
       document.getElementById('historyContainer').classList.add('hidden');
       historyLoaded = false;
     }
 
-    // Tampilkan pesan
-    function showMessage(element, message, type) {
-      element.textContent = message;
-      element.className = `message ${type}-message`;
-      element.classList.remove('hidden');
-      
-      // Sembunyikan pesan setelah 5 detik
-      setTimeout(() => {
-        element.classList.add('hidden');
-      }, 5000);
-    }
-    
-    // Tampilkan pesan di aplikasi utama
-    function showAppMessage(message, type) {
-      const messageElement = document.createElement('div');
-      messageElement.className = `message ${type}-message`;
-      messageElement.textContent = message;
-      
-      const appContainer = document.getElementById('appContainer');
-      appContainer.insertBefore(messageElement, appContainer.firstChild);
-      
-      // Sembunyikan pesan setelah 5 detik
-      setTimeout(() => {
-        messageElement.remove();
-      }, 5000);
-    }
-
-    // Tampilkan form login
-    function showLogin() {
-      document.getElementById('loginTab').classList.remove('hidden');
-      document.getElementById('registerTab').classList.add('hidden');
-      document.getElementById('loginMessage').classList.add('hidden');
-      clearFormFields();
-      document.getElementById('loginEmail').focus();
-    }
-
-    // Tampilkan form registrasi
-    function showRegister() {
-      document.getElementById('loginTab').classList.add('hidden');
-      document.getElementById('registerTab').classList.remove('hidden');
-      document.getElementById('registerMessage').classList.add('hidden');
-      clearFormFields();
-      document.getElementById('regName').focus();
-    }
-
-    // Bersihkan form
-    function clearFormFields() {
-      document.getElementById('loginEmail').value = '';
-      document.getElementById('loginPassword').value = '';
-      document.getElementById('regName').value = '';
-      document.getElementById('regEmail').value = '';
-      document.getElementById('regPassword').value = '';
-      document.getElementById('regConfirmPassword').value = '';
-      document.getElementById('passwordStrength').classList.add('hidden');
-    }
-
-    // Memuat history pengguna dalam format dashboard
+    // --- LOGIKA HISTORY & DASHBOARD ---
     function loadHistory() {
       if (!currentUser) return;
+      const history = getUserHistory(currentUser.email);
+      const historyContainer = document.getElementById('historyContainer');
+      historyContainer.innerHTML = '';
       
-      google.script.run.withSuccessHandler((history) => {
-        const historyContainer = document.getElementById('historyContainer');
-        historyContainer.innerHTML = '';
+      if (history.length === 0) {
+        historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
+      } else {
+        const dashboard = document.createElement('div');
+        dashboard.className = 'dashboard';
         
-        if (history && history.length === 0) {
-          historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
-        } else if (history) {
-          // Buat elemen dashboard
-          const dashboard = document.createElement('div');
-          dashboard.className = 'dashboard';
-          
-          // Hitung statistik
-          const totalSessions = history.length;
-          const ongoingSessions = history.filter(item => !item.endTime).length;
-          const completedSessions = totalSessions - ongoingSessions;
-          const totalDuration = history.reduce((total, item) => {
+        const totalSessions = history.length;
+        const totalDurationMs = history.reduce((total, item) => {
             if (item.duration) {
-              const [h, m, s] = item.duration.split(':').map(Number);
-              return total + h * 3600 + m * 60 + s;
+                const [h, m, s] = item.duration.split(':').map(Number);
+                return total + h * 3600 + m * 60 + s;
             }
             return total;
-          }, 0);
-          
-          // Format total duration
-          const totalHours = Math.floor(totalDuration / 3600);
-          const totalMinutes = Math.floor((totalDuration % 3600) / 60);
-          const totalSeconds = totalDuration % 60;
-          const formattedTotalDuration = `${totalHours.toString().padStart(2, '0')}:${totalMinutes.toString().padStart(2, '0')}:${totalSeconds.toString().padStart(2, '0')}`;
-          
-          // Tambahkan kartu statistik
-          dashboard.innerHTML += `
-            <div class="dashboard-card" onclick="showFullHistory()">
-              <div class="card-title">Total Izin Keluar</div>
-              <div class="card-value">${totalSessions}</div>
-              <div class="card-detail">${completedSessions} selesai, ${ongoingSessions} berjalan</div>
-            </div>
-            <div class="dashboard-card" onclick="showFullHistory()">
-              <div class="card-title">Total Durasi</div>
-              <div class="card-value">${formattedTotalDuration}</div>
-              <div class="card-detail">${totalHours} jam ${totalMinutes} menit</div>
-            </div>
-            <div class="dashboard-card" onclick="printHistory()">
-              <div class="card-title">Cetak History</div>
-              <div class="card-value"><i class="no-print">🖨️</i></div>
-              <div class="card-detail">Klik untuk mencetak</div>
-            </div>
-          `;
-          
-          // Tambahkan tombol untuk melihat detail
-          const viewDetailsBtn = document.createElement('button');
-          viewDetailsBtn.textContent = 'Lihat Detail Lengkap';
-          viewDetailsBtn.onclick = showFullHistory;
-          viewDetailsBtn.style.marginTop = '15px';
-          viewDetailsBtn.style.width = '100%';
-          
-          historyContainer.appendChild(dashboard);
-          historyContainer.appendChild(viewDetailsBtn);
-        }
+        }, 0);
         
-        historyContainer.classList.remove('hidden');
-        historyLoaded = true;
-      }).withFailureHandler((error) => {
-        console.error('Error loading history:', error);
-        showAppMessage('Gagal memuat history. Silakan coba lagi.', 'error');
-      }).getUserHistory(currentUser.email);
+        const totalHours = Math.floor(totalDurationMs / 3600);
+        const totalMinutes = Math.floor((totalDurationMs % 3600) / 60);
+        const formattedTotalDuration = `${totalHours.toString().padStart(2, '0')}:${totalMinutes.toString().padStart(2, '0')}:00`;
+        
+        dashboard.innerHTML += `
+          <div class="dashboard-card" onclick="showFullHistory()">
+            <div class="card-title">Total Izin Keluar</div>
+            <div class="card-value">${totalSessions}</div>
+            <div class="card-detail">Semua sesi telah selesai</div>
+          </div>
+          <div class="dashboard-card" onclick="showFullHistory()">
+            <div class="card-title">Total Durasi</div>
+            <div class="card-value">${formattedTotalDuration}</div>
+            <div class="card-detail">${totalHours} jam ${totalMinutes} menit</div>
+          </div>
+          <div class="dashboard-card" onclick="printHistory()">
+            <div class="card-title">Cetak History</div>
+            <div class="card-value"><i class="no-print">🖨️</i></div>
+            <div class="card-detail">Klik untuk mencetak</div>
+          </div>
+        `;
+        
+        const viewDetailsBtn = document.createElement('button');
+        viewDetailsBtn.textContent = 'Lihat Detail Lengkap';
+        viewDetailsBtn.onclick = showFullHistory;
+        viewDetailsBtn.style.marginTop = '15px';
+        viewDetailsBtn.style.width = '100%';
+        
+        historyContainer.appendChild(dashboard);
+        historyContainer.appendChild(viewDetailsBtn);
+      }
+      
+      historyContainer.classList.remove('hidden');
+      historyLoaded = true;
     }
 
-    // Tampilkan history lengkap dalam tabel
     function showFullHistory() {
-      if (!currentUser) return;
+      const history = getUserHistory(currentUser.email);
+      const historyContainer = document.getElementById('historyContainer');
+      historyContainer.innerHTML = '<h3 style="color: var(--primary-color); margin-bottom: 15px;">History Lengkap</h3>';
       
-      google.script.run.withSuccessHandler((history) => {
-        const historyContainer = document.getElementById('historyContainer');
-        historyContainer.innerHTML = '<h3 style="color: var(--primary-color); margin-bottom: 15px;">History Lengkap</h3>';
+      if (history.length === 0) {
+        historyContainer.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
+      } else {
+        const table = document.createElement('table');
+        const headerRow = document.createElement('tr');
+        ['No', 'Mulai', 'Selesai', 'Durasi'].forEach(text => {
+          const th = document.createElement('th'); th.textContent = text; headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
         
-        if (history && history.length === 0) {
-          historyContainer.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
-        } else if (history) {
-          const table = document.createElement('table');
-          
-          // Header tabel
-          const headerRow = document.createElement('tr');
-          ['No', 'Mulai', 'Selesai', 'Durasi', 'Status'].forEach(text => {
-            const th = document.createElement('th');
-            th.textContent = text;
-            headerRow.appendChild(th);
+        history.forEach((item, index) => {
+          const row = document.createElement('tr');
+          const cells = [index + 1, item.startTime, item.endTime, item.duration];
+          cells.forEach(cellText => {
+            const td = document.createElement('td'); td.textContent = cellText; row.appendChild(td);
           });
-          
-          table.appendChild(headerRow);
-          
-          // Isi tabel
-          history.forEach((item, index) => {
-            const row = document.createElement('tr');
-            
-            const cells = [
-              index + 1,
-              item.startTime || '-',
-              item.endTime || '-',
-              item.duration || '--:--:--',
-              item.endTime ? 'Selesai' : 'Berjalan'
-            ];
-            
-            cells.forEach(cellText => {
-              const td = document.createElement('td');
-              td.textContent = cellText;
-              row.appendChild(td);
-            });
-            
-            table.appendChild(row);
-          });
-          
-          historyContainer.appendChild(table);
-        }
-        
-        // Tambahkan tombol kembali dan cetak
-        const buttonRow = document.createElement('div');
-        buttonRow.style.display = 'flex';
-        buttonRow.style.gap = '10px';
-        buttonRow.style.marginTop = '15px';
-        
-        const backBtn = document.createElement('button');
-        backBtn.textContent = 'Kembali ke Dashboard';
-        backBtn.onclick = loadHistory;
-        
-        const printBtn = document.createElement('button');
-        printBtn.textContent = 'Cetak History';
-        printBtn.onclick = printHistory;
-        
-        buttonRow.appendChild(backBtn);
-        buttonRow.appendChild(printBtn);
-        historyContainer.appendChild(buttonRow);
-      }).withFailureHandler((error) => {
-        console.error('Error loading full history:', error);
-        showAppMessage('Gagal memuat history lengkap. Silakan coba lagi.', 'error');
-      }).getUserHistory(currentUser.email);
+          table.appendChild(row);
+        });
+        historyContainer.appendChild(table);
+      }
+      
+      const buttonRow = document.createElement('div');
+      buttonRow.style.display = 'flex'; buttonRow.style.gap = '10px'; buttonRow.style.marginTop = '15px';
+      const backBtn = document.createElement('button'); backBtn.textContent = 'Kembali ke Dashboard'; backBtn.onclick = loadHistory;
+      const printBtn = document.createElement('button'); printBtn.textContent = 'Cetak History'; printBtn.onclick = printHistory;
+      buttonRow.appendChild(backBtn); buttonRow.appendChild(printBtn);
+      historyContainer.appendChild(buttonRow);
     }
 
-    // Fungsi untuk mencetak history
     function printHistory() {
-      if (!currentUser) return;
+      const history = getUserHistory(currentUser.email);
+      document.getElementById('printUserName').textContent = currentUser.name;
+      document.getElementById('printDate').textContent = new Date().toLocaleString('id-ID');
+      const printBody = document.getElementById('printHistoryBody'); printBody.innerHTML = '';
       
-      google.script.run.withSuccessHandler((history) => {
-        // Isi data untuk dicetak
-        document.getElementById('printUserName').textContent = currentUser.name || currentUser.email;
-        document.getElementById('printDate').textContent = new Date().toLocaleString('id-ID');
-        
-        const printBody = document.getElementById('printHistoryBody');
-        printBody.innerHTML = '';
-        
-        if (history && history.length > 0) {
-          history.forEach((item, index) => {
-            const row = document.createElement('tr');
-            
-            row.innerHTML = `
-              <td>${index + 1}</td>
-              <td>${item.startTime || '-'}</td>
-              <td>${item.endTime || '-'}</td>
-              <td>${item.duration || '--:--:--'}</td>
-            `;
-            
-            printBody.appendChild(row);
-          });
-        } else {
-          printBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada data history</td></tr>';
-        }
-        
-        // Trigger print
-        const printContainer = document.getElementById('printContainer');
-        printContainer.style.display = 'block';
-        window.print();
-        printContainer.style.display = 'none';
-      }).withFailureHandler((error) => {
-        console.error('Error loading history for print:', error);
-        showAppMessage('Gagal memuat data untuk dicetak. Silakan coba lagi.', 'error');
-      }).getUserHistory(currentUser.email);
+      if (history.length > 0) {
+        history.forEach((item, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${index + 1}</td><td>${item.startTime}</td><td>${item.endTime}</td><td>${item.duration}</td>`;
+          printBody.appendChild(row);
+        });
+      } else {
+        printBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada data history</td></tr>';
+      }
+      
+      const printContainer = document.getElementById('printContainer');
+      printContainer.style.display = 'block';
+      window.print();
+      printContainer.style.display = 'none';
     }
 
-    // Tampilkan halaman ganti password
+    // --- LOGIKA GANTI PASSWORD ---
     function showChangePassword() {
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('changePasswordContainer').classList.remove('hidden');
       document.getElementById('changePasswordEmail').textContent = currentUser.email;
       document.getElementById('currentPassword').focus();
-      
-      // Reset pesan
       document.getElementById('changePasswordMessage').classList.add('hidden');
     }
 
-    // Kembali ke aplikasi utama
     function backToApp() {
       document.getElementById('changePasswordContainer').classList.add('hidden');
       document.getElementById('appContainer').classList.remove('hidden');
       clearChangePasswordFields();
     }
 
-    // Bersihkan field ganti password
     function clearChangePasswordFields() {
       document.getElementById('currentPassword').value = '';
       document.getElementById('newPassword').value = '';
@@ -1176,19 +898,11 @@
       document.getElementById('changePasswordMessage').classList.add('hidden');
     }
 
-    // Cek kekuatan password baru
     function checkNewPasswordStrength() {
       const password = document.getElementById('newPassword').value;
       const strengthElement = document.getElementById('newPasswordStrength');
-      
-      if (!password) {
-        strengthElement.classList.add('hidden');
-        return;
-      }
-      
+      if (!password) { strengthElement.classList.add('hidden'); return; }
       strengthElement.classList.remove('hidden');
-      
-      // Hitung kekuatan password
       let strength = 0;
       if (password.length >= 6) strength++;
       if (password.length >= 8) strength++;
@@ -1196,186 +910,97 @@
       if (/[0-9]/.test(password)) strength++;
       if (/[^A-Za-z0-9]/.test(password)) strength++;
       
-      if (strength <= 2) {
-        strengthElement.textContent = 'Lemah';
-        strengthElement.className = 'password-strength strength-weak';
-      } else if (strength <= 4) {
-        strengthElement.textContent = 'Sedang';
-        strengthElement.className = 'password-strength strength-medium';
-      } else {
-        strengthElement.textContent = 'Kuat';
-        strengthElement.className = 'password-strength strength-strong';
-      }
+      if (strength <= 2) { strengthElement.textContent = 'Lemah'; strengthElement.className = 'password-strength strength-weak'; }
+      else if (strength <= 4) { strengthElement.textContent = 'Sedang'; strengthElement.className = 'password-strength strength-medium'; }
+      else { strengthElement.textContent = 'Kuat'; strengthElement.className = 'password-strength strength-strong'; }
     }
 
-    // Proses ganti password
     function processChangePassword() {
       const currentPassword = document.getElementById('currentPassword').value.trim();
       const newPassword = document.getElementById('newPassword').value.trim();
       const confirmNewPassword = document.getElementById('confirmNewPassword').value.trim();
       const messageElement = document.getElementById('changePasswordMessage');
       
-      // Validasi input
       if (!currentPassword || !newPassword || !confirmNewPassword) {
-        showMessage(messageElement, 'Semua field harus diisi', 'error');
-        return;
+        showMessage(messageElement, 'Semua field harus diisi', 'error'); return;
       }
-      
       if (newPassword.length < 6) {
-        showMessage(messageElement, 'Password baru minimal 6 karakter', 'error');
-        return;
+        showMessage(messageElement, 'Password baru minimal 6 karakter', 'error'); return;
       }
-      
       if (newPassword === currentPassword) {
-        showMessage(messageElement, 'Password baru harus berbeda dengan password lama', 'error');
-        return;
+        showMessage(messageElement, 'Password baru harus berbeda dengan password lama', 'error'); return;
       }
-      
       if (newPassword !== confirmNewPassword) {
-        showMessage(messageElement, 'Password baru tidak cocok', 'error');
-        return;
+        showMessage(messageElement, 'Password baru tidak cocok', 'error'); return;
       }
       
-      showMessage(messageElement, 'Sedang memproses perubahan password...', 'success');
-      
-      // Panggil fungsi server untuk ganti password
-      google.script.run.withSuccessHandler((response) => {
-        if (response.status === "success") {
-          showMessage(messageElement, 'Password berhasil diubah! Anda akan diarahkan ke halaman login.', 'success');
-          
-          // Setelah 2 detik, logout dan kembali ke halaman login
-          setTimeout(() => {
-            // Reset form
-            clearChangePasswordFields();
-            
-            // Kembali ke halaman login
-            document.getElementById('changePasswordContainer').classList.add('hidden');
-            document.getElementById('appContainer').classList.add('hidden');
-            document.getElementById('authContainer').classList.remove('hidden');
-            showLogin();
-            
-            // Auto-fill email di form login
-            document.getElementById('loginEmail').value = currentUser.email;
-            document.getElementById('loginPassword').focus();
-            
-            // Clear user session
-            currentUser = null;
-            clearAppState();
-          }, 2000);
-        } else {
-          showMessage(messageElement, response.message || 'Gagal mengubah password', 'error');
-        }
-      }).withFailureHandler((error) => {
-        console.error('Change password error:', error);
-        showMessage(messageElement, 'Terjadi kesalahan saat mengubah password', 'error');
-      }).changeUserPassword(currentUser.email, currentPassword, newPassword);
+      const response = changeUserPassword(currentUser.email, currentPassword, newPassword);
+      if (response.status === "success") {
+        showMessage(messageElement, response.message + ' Anda akan diarahkan ke halaman login.', 'success');
+        setTimeout(() => {
+          clearChangePasswordFields();
+          logout();
+          document.getElementById('loginEmail').value = currentUser.email;
+          document.getElementById('loginPassword').focus();
+        }, 2000);
+      } else {
+        showMessage(messageElement, response.message, 'error');
+      }
     }
 
-    // Memeriksa session saat load
+    // --- INISIALISASI & EVENT LISTENERS ---
+    function clearFormFields() {
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
     function checkSession() {
-      // Cek localStorage terlebih dahulu
-      const savedState = localStorage.getItem('izinKeluarAppState');
+      const savedState = localStorage.getItem(APP_STATE_KEY);
       if (savedState) {
         const state = JSON.parse(savedState);
-        
-        google.script.run.withSuccessHandler((user) => {
-          if (user && user.email) {
-            currentUser = user;
-            document.getElementById('welcomeMessage').textContent = `Selamat datang, ${user.name || user.email}!`;
-            document.getElementById('authContainer').classList.add('hidden');
-            document.getElementById('appContainer').classList.remove('hidden');
-            
-            // Muat state timer
-            loadAppState();
-            
-            // Verifikasi dengan server
-            checkUnfinishedTimer();
-          } else {
-            // Jika tidak valid di server, bersihkan state
-            clearAppState();
-          }
-        }).withFailureHandler((error) => {
-          console.error('Error checking session:', error);
+        const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
+        const user = users[state.userEmail];
+        if (user) {
+          currentUser = { email: state.userEmail, name: state.userName };
+          document.getElementById('welcomeMessage').textContent = `Selamat datang, ${currentUser.name}!`;
+          document.getElementById('authContainer').classList.add('hidden');
+          document.getElementById('appContainer').classList.remove('hidden');
+          loadAppState();
+          checkUnfinishedTimer();
+        } else {
           clearAppState();
-        }).getCurrentUser();
+        }
       }
     }
 
-    // Memeriksa timer yang belum selesai
     function checkUnfinishedTimer() {
       if (!currentUser) return;
-      
-      google.script.run.withSuccessHandler((unfinishedTimer) => {
-        if (unfinishedTimer) {
-          // Parse waktu mulai dari string ke Date object
-          const [datePart, timePart] = unfinishedTimer.startTime.split(' ');
-          const [day, month, year] = datePart.split('/');
-          const [hours, minutes, seconds] = timePart.split(':');
-          
-          startTime = new Date(year, month - 1, day, hours, minutes, seconds);
-          isTimerRunning = true;
-          timerInterval = setInterval(updateTimerDisplay, 1000);
-          document.getElementById('startBtn').disabled = true;
-          document.getElementById('endBtn').disabled = false;
-          
-          // Hitung waktu yang sudah berlalu
-          const now = new Date();
-          const elapsed = now - startTime;
-          document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
-        }
-      }).withFailureHandler((error) => {
-        console.error('Error checking unfinished timer:', error);
-      }).getUnfinishedTimer(currentUser.email);
+      const unfinishedTimer = getUnfinishedTimer(currentUser.email);
+      if (unfinishedTimer) {
+        const [datePart, timePart] = unfinishedTimer.startTime.split(' ');
+        const [day, month, year] = datePart.split('/');
+        const [hours, minutes, seconds] = timePart.split(':');
+        startTime = new Date(year, month - 1, day, hours, minutes, seconds);
+        isTimerRunning = true;
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('endBtn').disabled = false;
+        const now = new Date();
+        const elapsed = now - startTime;
+        document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
+      }
     }
 
-    // Inisialisasi
     window.onload = function() {
-      // Initialize sheets on first run
-      google.script.run.withFailureHandler((error) => {
-        console.error('Error initializing sheets:', error);
-      }).initializeSheets();
-      
+      initializeUserDatabase();
       setInterval(updateDigitalClock, 1000);
       updateDigitalClock();
       checkSession();
       
-      // Event listeners untuk form
-      document.getElementById('loginEmail').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') login();
-      });
-      
-      document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') login();
-      });
-      
-      document.getElementById('regName').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') register();
-      });
-      
-      document.getElementById('regEmail').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') register();
-      });
-      
-      document.getElementById('regPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') register();
-      });
-      
-      document.getElementById('regConfirmPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') register();
-      });
-      
-      // Event listener untuk form ganti password
-      document.getElementById('currentPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') processChangePassword();
-      });
-      
-      document.getElementById('newPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') processChangePassword();
-      });
-      
-      document.getElementById('confirmNewPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') processChangePassword();
-      });
+      document.getElementById('loginPassword').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+      document.getElementById('currentPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
+      document.getElementById('newPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
+      document.getElementById('confirmNewPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
     };
   </script>
 </body>
