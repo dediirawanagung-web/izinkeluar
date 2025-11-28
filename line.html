@@ -5,17 +5,18 @@
   <title>Jam Izin Keluar</title>
   <style>
     :root {
-      --primary-color: rgba(255, 105, 180, 0.9);
-      --primary-light: rgba(255, 105, 180, 0.7);
-      --primary-dark: rgba(255, 105, 180, 0.3);
+      /* Palet Warna Baru yang Lebih Elegan */
+      --primary-color: rgba(0, 212, 255, 0.9); /* Cyan */
+      --primary-light: rgba(0, 212, 255, 0.7);
+      --primary-dark: rgba(0, 212, 255, 0.3);
       --text-color: rgba(255, 255, 255, 1);
       --text-secondary: rgba(255, 255, 255, 0.9);
       --bg-dark: rgba(18, 18, 18, 0.2);
-      --card-bg: rgba(30, 30, 30, 0.15);
-      --input-bg: rgba(45, 45, 45, 0.15);
+      --card-bg: rgba(255, 255, 255, 0.1); /* Lebih transparan untuk efek kaca */
+      --input-bg: rgba(255, 255, 255, 0.15);
       --error-color: rgba(255, 68, 68, 0.8);
       --success-color: rgba(0, 200, 81, 0.8);
-      --border-color: rgba(255, 255, 255, 0.1);
+      --border-color: rgba(255, 255, 255, 0.2);
     }
     
     body {
@@ -24,27 +25,40 @@
       margin: 0 auto;
       padding: 20px;
       color: white;
-      background-image: url('https://i.pinimg.com/736x/0d/4b/2f/0d4b2f444ea82b8790fbf0e6db622ee9.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
+      /* --- LATAR BELAKANG BARU --- */
+      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       min-height: 100vh;
+    }
+
+    /* --- ANIMASI UNTUK GRADIENT LATAR BELAKANG --- */
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
     }
     
     .container {
       background-color: var(--card-bg);
       padding: 25px;
       border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      /* --- EFEK KACA (GLASSMORPHISM) --- */
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       text-align: center;
-      border: 1px solid var(--border-color);
       position: relative;
       overflow: hidden;
       margin-top: 20px;
       margin-bottom: 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       color: white;
     }
     
@@ -66,7 +80,7 @@
       left: 0;
       width: 100%;
       height: 2px;
-      background: linear-gradient(90deg, transparent, white, transparent);
+      background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
       animation: blinkGlow 3s infinite ease-in-out;
     }
     
@@ -104,9 +118,9 @@
     
     button {
       width: 100%;
-      background: linear-gradient(45deg, rgba(255, 105, 180, 0.2), rgba(255, 105, 180, 0.4));
+      background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.4));
       color: white;
-      border: 1px solid rgba(255, 105, 180, 0.3);
+      border: 1px solid rgba(0, 212, 255, 0.3);
       padding: 12px;
       border-radius: 8px;
       font-size: 14px;
@@ -120,8 +134,8 @@
     
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.2);
-      background: linear-gradient(45deg, rgba(255, 105, 180, 0.3), rgba(255, 105, 180, 0.5));
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+      background: linear-gradient(45deg, rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.5));
     }
     
     button:disabled {
@@ -132,8 +146,8 @@
     }
     
     .logout-btn {
-      background: rgba(255, 105, 180, 0.1);
-      border: 1px solid rgba(255, 105, 180, 0.4);
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.4);
       color: white;
       transition: all 0.3s ease;
       width: auto;
@@ -147,9 +161,9 @@
     }
     
     .logout-btn:hover {
-      background: rgba(255, 105, 180, 0.2);
+      background: rgba(0, 212, 255, 0.2);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.2);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
     }
     
     .hidden { display: none; }
@@ -190,8 +204,8 @@
     
     input:focus {
       outline: none;
-      border-color: white;
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
     }
     
     .switch-form {
@@ -201,7 +215,7 @@
     }
     
     .switch-form a {
-      color: white;
+      color: var(--primary-color);
       text-decoration: none;
       font-weight: 600;
       cursor: pointer;
@@ -254,7 +268,7 @@
     }
     
     .dashboard-card {
-      background-color: rgba(45, 45, 45, 0.15);
+      background-color: var(--card-bg);
       border-radius: 10px;
       padding: 15px;
       border-left: 4px solid var(--primary-color);
@@ -268,8 +282,8 @@
     
     .dashboard-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.15);
-      background-color: rgba(45, 45, 45, 0.25);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.15);
+      background-color: rgba(255, 255, 255, 0.15);
     }
     
     .card-title { font-size: 14px; color: white; margin-bottom: 8px; opacity: 0.9; }
@@ -297,43 +311,43 @@
       border-collapse: collapse;
       margin-top: 10px;
       background-color: rgba(30, 30, 30, 0.2);
-      border: 1px solid rgba(255, 105, 180, 0.2);
+      border: 1px solid rgba(0, 212, 255, 0.2);
       animation: tableGlow 3s infinite ease-in-out;
       color: white;
     }
     
     #historyContainer th {
-      background-color: rgba(255, 105, 180, 0.15);
+      background-color: rgba(0, 212, 255, 0.15);
       color: white !important;
       padding: 8px;
       text-align: left;
-      border-bottom: 2px solid rgba(255, 105, 180, 0.5);
+      border-bottom: 2px solid rgba(0, 212, 255, 0.5);
       animation: thGlow 3s infinite ease-in-out;
     }
     
     #historyContainer td {
       padding: 8px;
-      border: 1px solid rgba(255, 105, 180, 0.3);
+      border: 1px solid rgba(0, 212, 255, 0.3);
       animation: tdGlow 3s infinite ease-in-out;
       color: white;
     }
     
-    #historyContainer tr:nth-child(even) { background-color: rgba(255, 105, 180, 0.03); }
-    #historyContainer tr:hover { background-color: rgba(255, 105, 180, 0.1) !important; }
+    #historyContainer tr:nth-child(even) { background-color: rgba(0, 212, 255, 0.03); }
+    #historyContainer tr:hover { background-color: rgba(0, 212, 255, 0.1) !important; }
     
     @keyframes tableGlow {
-      0%, 100% { border-color: rgba(255, 105, 180, 0.3); box-shadow: 0 0 5px rgba(255, 105, 180, 0.1); }
-      50% { border-color: rgba(255, 105, 180, 0.8); box-shadow: 0 0 15px rgba(255, 105, 180, 0.3); }
+      0%, 100% { border-color: rgba(0, 212, 255, 0.3); box-shadow: 0 0 5px rgba(0, 212, 255, 0.1); }
+      50% { border-color: rgba(0, 212, 255, 0.8); box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
     }
     
     @keyframes thGlow {
-      0%, 100% { border-bottom-color: rgba(255, 105, 180, 0.3); }
-      50% { border-bottom-color: rgba(255, 105, 180, 0.8); }
+      0%, 100% { border-bottom-color: rgba(0, 212, 255, 0.3); }
+      50% { border-bottom-color: rgba(0, 212, 255, 0.8); }
     }
     
     @keyframes tdGlow {
-      0%, 100% { border-color: rgba(255, 105, 180, 0.2); }
-      50% { border-color: rgba(255, 105, 180, 0.5); }
+      0%, 100% { border-color: rgba(0, 212, 255, 0.2); }
+      50% { border-color: rgba(0, 212, 255, 0.5); }
     }
     
     .print-table {
@@ -347,19 +361,19 @@
     }
     
     .print-table th {
-      background-color: rgba(255, 105, 180, 0.3) !important;
+      background-color: rgba(0, 212, 255, 0.3) !important;
       color: white !important;
       border-bottom: 2px solid var(--primary-color) !important;
       animation: thGlow 3s infinite ease-in-out;
     }
     
     .print-table td {
-      border: 1px solid rgba(255, 105, 180, 0.2) !important;
+      border: 1px solid rgba(0, 212, 255, 0.2) !important;
       animation: tdGlow 3s infinite ease-in-out;
       color: white;
     }
     
-    .print-table tr:nth-child(even) { background-color: rgba(255, 105, 180, 0.05) !important; }
+    .print-table tr:nth-child(even) { background-color: rgba(0, 212, 255, 0.05) !important; }
     
     /* New styles for Google Sheets export */
     .export-btn {
