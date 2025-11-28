@@ -378,6 +378,38 @@
         color: var(--text-secondary);
     }
     
+    .tab-container {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.3s;
+    }
+    
+    .tab.active {
+      color: white;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .tab:hover {
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
     @media print {
       body * { visibility: hidden; }
       #printContainer, #printContainer * { visibility: visible; }
@@ -410,7 +442,12 @@
       <h1>LOGIN JAM IZIN KELUAR</h1>
       <div id="digitalClock"></div>
       
-      <div id="loginTab">
+      <div class="tab-container">
+        <div class="tab active" onclick="switchTab('login')">Login</div>
+        <div class="tab" onclick="switchTab('register')">Daftar</div>
+      </div>
+      
+      <div id="loginTab" class="tab-content active">
         <div id="loginMessage" class="message hidden"></div>
         <div class="form-group">
           <label for="loginEmail">Email:</label>
@@ -422,7 +459,33 @@
         </div>
         <button onclick="login()">Login</button>
         <div class="switch-form">
-          Gunakan email dari daftar staf dan password <strong>admin123</strong>
+          Gunakan email dari daftar staf dan password yang telah Anda daftarkan
+        </div>
+      </div>
+      
+      <div id="registerTab" class="tab-content">
+        <div id="registerMessage" class="message hidden"></div>
+        <div class="form-group">
+          <label for="registerEmail">Email:</label>
+          <input type="email" id="registerEmail" required placeholder="Masukkan email Anda">
+          <div class="auth-status">Hanya email yang terdaftar di sistem yang bisa digunakan</div>
+        </div>
+        <div class="form-group">
+          <label for="registerName">Nama Lengkap:</label>
+          <input type="text" id="registerName" required placeholder="Masukkan nama lengkap Anda">
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Password:</label>
+          <input type="password" id="registerPassword" required placeholder="Minimal 6 karakter" oninput="checkPasswordStrength()">
+          <div id="passwordStrength" class="password-strength hidden"></div>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Konfirmasi Password:</label>
+          <input type="password" id="confirmPassword" required placeholder="Ketik ulang password Anda">
+        </div>
+        <button onclick="register()">Daftar</button>
+        <div class="switch-form">
+          Sudah punya akun? <a onclick="switchTab('login')">Login di sini</a>
         </div>
       </div>
     </div>
@@ -515,81 +578,18 @@
     const SPREADSHEET_ID = 'MASUKKAN_SPREADSHEET_ID_KELUAR_AGUENG_DISINI';
     
     const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly';
     
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
     let isGoogleAuthorized = false;
+    let allowedEmails = [];
 
     // Inisialisasi database pengguna jika belum ada
     function initializeUserDatabase() {
         if (!localStorage.getItem(DB_USERS_KEY)) {
-            const defaultUsers = {
-                'widjaya88.smb88@gmail.com': { name: 'WIDJAYA', password: 'admin123' },
-                'david.smb9856@gmail.com': { name: 'DAVID', password: 'admin123' },
-                'charlie454506@gmail.com': { name: 'CHARLIE', password: 'admin123' },
-                'hariantohari6036@gmail.com': { name: 'HARIANTO', password: 'admin123' },
-                'rinalabdilah.smb88@gmail.com': { name: 'RINAL ABDILLAH NASUTION', password: 'admin123' },
-                'erihari391@gmail.com': { name: 'ERI HARIANTO', password: 'admin123' },
-                'mahendranmahh2388@gmail.com': { name: 'MAHENDRAN', password: 'admin123' },
-                'tommyhasim2304@gmail.com': { name: 'TOMMY HASIM', password: 'admin123' },
-                'ranjit230422@gmail.com': { name: 'RANJIT', password: 'admin123' },
-                'willyperayuda7789@gmail.com': { name: 'WILLY PERAYUDA', password: 'admin123' },
-                'andibaru536@gmail.com': { name: 'ANDI', password: 'admin123' },
-                'alfinomuk3256@gmail.com': { name: 'ALFINO MUKTI', password: 'admin123' },
-                'akasfarm87663@gmail.com': { name: 'AKAS FARMA', password: 'admin123' },
-                'ariromandus12@gmail.com': { name: 'ARI ROMANDUS FERNAND', password: 'admin123' },
-                'parisamrulloh26885@gmail.com': { name: 'PARIS AMRULLOH', password: 'admin123' },
-                'samsulma874@gmail.com': { name: 'SAMSUL MAARIF', password: 'admin123' },
-                'razzsuhan@gmail.com': { name: 'SUHAN RAZ', password: 'admin123' },
-                'rahmadisormi.smb888@gmail.com': { name: 'RAHMADI SORMIN', password: 'admin123' },
-                'novalmuttawali354@gmail.com': { name: 'NOVAL MUTTAWALI HAKIM', password: 'admin123' },
-                'putraanugrahrizki76@gmail.com': { name: 'PUTRA ANUGRAH RIZKI', password: 'admin123' },
-                'iamwil220@gmail.com': { name: 'WILIAM', password: 'admin123' },
-                'pramdhani086@gmail.com': { name: 'PUTRA RAMADHANI', password: 'admin123' },
-                'fiqalkana6@gmail.com': { name: 'FIQAL KANA', password: 'admin123' },
-                'marjokisang.smb88@gmail.com': { name: 'MARJOKI SANG', password: 'admin123' },
-                'danielsmb385@gmail.com': { name: 'DANIEL', password: 'admin123' },
-                'raazjesen88.smb88@gmail.com': { name: 'RAAZ JESEN STEPANUS', password: 'admin123' },
-                'mahatsanjayahrp@gmail.com': { name: 'MAHAT SANJAYA HARAHAP', password: 'admin123' },
-                'aamrul568@gmail.com': { name: 'AMRUL', password: 'admin123' },
-                'jonromanpurba0305@gmail.com': { name: 'JONROMAN PURBA', password: 'admin123' },
-                'annen.smb88@gmail.com': { name: 'ANNEN', password: 'admin123' },
-                'mfajjarsiddik69@gmail.com': { name: 'M FAJAR SIDDIK', password: 'admin123' },
-                'bobykasandrabancin@gmail.com': { name: 'BOBY KASANDRA BANCIN', password: 'admin123' },
-                'kikiyunita523@gmail.com': { name: 'KIKI YUNITA', password: 'admin123' },
-                'galit8158@gmail.com': { name: 'GALI PRATAMA', password: 'admin123' },
-                'primanugraha428@gmail.com': { name: 'PRIMA NUGRAHA', password: 'admin123' },
-                'roydilensmb@gmail.com': { name: 'ROY DILEN', password: 'admin123' },
-                'ridzkyramadhan550@gmail.com': { name: 'RIDZKY RAMADHAN', password: 'admin123' },
-                'dediirawanagung@gmail.com': { name: 'AGUNG DEDI IRAWAN', password: 'admin123' },
-                'maiceltampu210424@gmail.com': { name: 'MAICEL TAMPUBOLON', password: 'admin123' },
-                'adechairunis260424@gmail.com': { name: 'ADE CHAIRUNNISA', password: 'admin123' },
-                'rezisyaputrasmb@gmail.com': { name: 'M REZI SYAPUTRA', password: 'admin123' },
-                'khoiruddin1317@gmail.com': { name: 'KHOIRUDDIN', password: 'admin123' },
-                'bambangagungsutrisno@gmail.com': { name: 'BAMBANG AGUNG SUTRISNO', password: 'admin123' },
-                'putrainsany21@gmail.com': { name: 'PUTRA INSANY', password: 'admin123' },
-                'ferasalmake2@gmail.com': { name: 'FERA SALMA', password: 'admin123' },
-                'rizkyrivlan@gmail.com': { name: 'RIVLAN RIZKY', password: 'admin123' },
-                'saidmaulanaali90@gmail.com': { name: 'MAULANA ALI SAID', password: 'admin123' },
-                'ahmadandika.smb88@gmail.com': { name: 'AHMAD ANDIKA', password: 'admin123' },
-                'ksanggara757@gmail.com': { name: 'ANGGARA K S', password: 'admin123' },
-                'dimasadhitya127@gmail.com': { name: 'DIMAS ADHITYA', password: 'admin123' },
-                'egaprayuda877@gmail.com': { name: 'EGA PRAYUDA', password: 'admin123' },
-                'arjunpraisya066@gmail.com': { name: 'ARJUN PRAISYA', password: 'admin123' },
-                'panca9244@gmail.com': { name: 'ADITYA PANCA', password: 'admin123' },
-                'audisoyong@gmail.com': { name: 'AUDIS OYONG DUANSYAH', password: 'admin123' },
-                'ojia43949@gmail.com': { name: 'ADE OJI SHAPUTRA', password: 'admin123' },
-                'alfiansyah556677@gmail.com': { name: 'ALFIANSYAH', password: 'admin123' },
-                'andyputra556677@gmail.com': { name: 'ANDY PUTRA', password: 'admin123' },
-                'junitamarsha96@gmail.com': { name: 'JUNITA MARSHA', password: 'admin123' },
-                'melaniputritrinita25@gmail.com': { name: 'MELAN PUTRI TRINITA', password: 'admin123' },
-                'syarifahrumiatiastari2807@gmail.com': { name: 'SYARIFAH RUMIATI ASTARI', password: 'admin123' },
-                'perdanaputra00711@gmail.com': { name: 'PERDANA PUTRA', password: 'admin123' },
-                'gunawan87smb@gmail.com': { name: 'GUNAWAN', password: 'admin123' },
-                'mayamarsela47@gmail.com': { name: 'MAYA MARSELA', password: 'admin123' }
-            };
+            const defaultUsers = {};
             localStorage.setItem(DB_USERS_KEY, JSON.stringify(defaultUsers));
         }
     }
@@ -722,6 +722,101 @@
       if (historyLoaded) loadHistory();
     }
 
+    // --- TAB SWITCHING ---
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.getElementById('loginTab').classList.remove('active');
+      document.getElementById('registerTab').classList.remove('active');
+      
+      // Remove active class from all tab buttons
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      // Show selected tab
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      // Add active class to clicked tab button
+      if (tabName === 'login') {
+        tabs[0].classList.add('active');
+      } else {
+        tabs[1].classList.add('active');
+      }
+    }
+
+    // --- LOGIKA REGISTRASI ---
+    function checkPasswordStrength() {
+      const password = document.getElementById('registerPassword').value;
+      const strengthElement = document.getElementById('passwordStrength');
+      if (!password) { strengthElement.classList.add('hidden'); return; }
+      strengthElement.classList.remove('hidden');
+      let strength = 0;
+      if (password.length >= 6) strength++;
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+      
+      if (strength <= 2) { strengthElement.textContent = 'Lemah'; strengthElement.className = 'password-strength strength-weak'; }
+      else if (strength <= 4) { strengthElement.textContent = 'Sedang'; strengthElement.className = 'password-strength strength-medium'; }
+      else { strengthElement.textContent = 'Kuat'; strengthElement.className = 'password-strength strength-strong'; }
+    }
+
+    function register() {
+      const email = document.getElementById('registerEmail').value.trim();
+      const name = document.getElementById('registerName').value.trim();
+      const password = document.getElementById('registerPassword').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      const messageElement = document.getElementById('registerMessage');
+      
+      if (!email || !name || !password || !confirmPassword) {
+        showMessage(messageElement, 'Semua field harus diisi', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showMessage(messageElement, 'Password minimal 6 karakter', 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showMessage(messageElement, 'Password tidak cocok', 'error');
+        return;
+      }
+      
+      // Check if email is allowed
+      if (!isEmailAllowed(email)) {
+        showMessage(messageElement, 'Email tidak terdaftar di sistem. Silakan gunakan email yang terdaftar.', 'error');
+        return;
+      }
+      
+      // Check if user already exists
+      const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
+      if (users[email]) {
+        showMessage(messageElement, 'Email sudah terdaftar. Silakan login atau gunakan email lain.', 'error');
+        return;
+      }
+      
+      // Register user
+      users[email] = { name, password };
+      localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
+      
+      showMessage(messageElement, 'Registrasi berhasil! Silakan login dengan akun Anda.', 'success');
+      
+      // Clear form
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerName').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('passwordStrength').classList.add('hidden');
+      
+      // Switch to login tab after successful registration
+      setTimeout(() => {
+        switchTab('login');
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').focus();
+      }, 2000);
+    }
+
     // --- LOGIKA AUTENTIKASI (STANDALONE) ---
     function loginUser(email, password) {
       const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
@@ -807,10 +902,14 @@
       if (history.length === 0) {
         historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
       } else {
+        // Fokus pada history durasi
         const dashboard = document.createElement('div');
         dashboard.className = 'dashboard';
         
+        // Hitung total sesi
         const totalSessions = history.length;
+        
+        // Hitung total durasi dalam menit
         const totalDurationMs = history.reduce((total, item) => {
             if (item.duration) {
                 const [h, m, s] = item.duration.split(':').map(Number);
@@ -823,26 +922,50 @@
         const totalMinutes = Math.floor((totalDurationMs % 3600) / 60);
         const formattedTotalDuration = `${totalHours.toString().padStart(2, '0')}:${totalMinutes.toString().padStart(2, '0')}:00`;
         
+        // Hitung rata-rata durasi
+        const avgDurationSeconds = totalDurationMs / totalSessions;
+        const avgHours = Math.floor(avgDurationSeconds / 3600);
+        const avgMinutes = Math.floor((avgDurationSeconds % 3600) / 60);
+        const formattedAvgDuration = `${avgHours.toString().padStart(2, '0')}:${avgMinutes.toString().padStart(2, '0')}:00`;
+        
+        // Cari durasi terpanjang
+        let maxDurationSeconds = 0;
+        let maxDurationEntry = null;
+        history.forEach(item => {
+            if (item.duration) {
+                const [h, m, s] = item.duration.split(':').map(Number);
+                const totalSeconds = h * 3600 + m * 60 + s;
+                if (totalSeconds > maxDurationSeconds) {
+                    maxDurationSeconds = totalSeconds;
+                    maxDurationEntry = item;
+                }
+            }
+        });
+        
+        const maxHours = Math.floor(maxDurationSeconds / 3600);
+        const maxMinutes = Math.floor((maxDurationSeconds % 3600) / 60);
+        const formattedMaxDuration = `${maxHours.toString().padStart(2, '0')}:${maxMinutes.toString().padStart(2, '0')}:00`;
+        
         dashboard.innerHTML += `
           <div class="dashboard-card" onclick="showFullHistory()">
-            <div class="card-title">Total Izin Keluar</div>
+            <div class="card-title">Total Sesi Izin Keluar</div>
             <div class="card-value">${totalSessions}</div>
-            <div class="card-detail">Semua sesi telah selesai</div>
+            <div class="card-detail">Jumlah total sesi yang telah selesai</div>
           </div>
           <div class="dashboard-card" onclick="showFullHistory()">
             <div class="card-title">Total Durasi</div>
             <div class="card-value">${formattedTotalDuration}</div>
             <div class="card-detail">${totalHours} jam ${totalMinutes} menit</div>
           </div>
-          <div class="dashboard-card" onclick="printHistory()">
-            <div class="card-title">Cetak History</div>
-            <div class="card-value"><i class="no-print">🖨️</i></div>
-            <div class="card-detail">Klik untuk mencetak</div>
+          <div class="dashboard-card" onclick="showFullHistory()">
+            <div class="card-title">Rata-rata Durasi</div>
+            <div class="card-value">${formattedAvgDuration}</div>
+            <div class="card-detail">Rata-rata waktu per sesi</div>
           </div>
-          <div class="dashboard-card" onclick="exportToGoogleSheets()">
-            <div class="card-title">Export ke Google Sheets</div>
-            <div class="card-value"><i class="no-print">📊</i></div>
-            <div class="card-detail">Klik untuk export</div>
+          <div class="dashboard-card" onclick="showFullHistory()">
+            <div class="card-title">Durasi Terpanjang</div>
+            <div class="card-value">${formattedMaxDuration}</div>
+            <div class="card-detail">Pada ${maxDurationEntry ? maxDurationEntry.startTime.split(' ')[0] : '-'}</div>
           </div>
         `;
         
@@ -870,14 +993,17 @@
       } else {
         const table = document.createElement('table');
         const headerRow = document.createElement('tr');
-        ['No', 'Mulai', 'Selesai', 'Durasi'].forEach(text => {
+        ['No', 'Tanggal', 'Waktu Mulai', 'Waktu Selesai', 'Durasi'].forEach(text => {
           const th = document.createElement('th'); th.textContent = text; headerRow.appendChild(th);
         });
         table.appendChild(headerRow);
         
         history.forEach((item, index) => {
           const row = document.createElement('tr');
-          const cells = [index + 1, item.startTime, item.endTime, item.duration];
+          const date = item.startTime.split(' ')[0];
+          const startTime = item.startTime.split(' ')[1];
+          const endTime = item.endTime.split(' ')[1];
+          const cells = [index + 1, date, startTime, endTime, item.duration];
           cells.forEach(cellText => {
             const td = document.createElement('td'); td.textContent = cellText; row.appendChild(td);
           });
@@ -904,11 +1030,14 @@
       if (history.length > 0) {
         history.forEach((item, index) => {
           const row = document.createElement('tr');
-          row.innerHTML = `<td>${index + 1}</td><td>${item.startTime}</td><td>${item.endTime}</td><td>${item.duration}</td>`;
+          const date = item.startTime.split(' ')[0];
+          const startTime = item.startTime.split(' ')[1];
+          const endTime = item.endTime.split(' ')[1];
+          row.innerHTML = `<td>${index + 1}</td><td>${date}</td><td>${startTime}</td><td>${endTime}</td><td>${item.duration}</td>`;
           printBody.appendChild(row);
         });
       } else {
-        printBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada data history</td></tr>';
+        printBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Tidak ada data history</td></tr>';
       }
       
       const printContainer = document.getElementById('printContainer');
@@ -1002,6 +1131,7 @@
       }).then(() => {
         gapiInited = true;
         initializeGis();
+        fetchAllowedEmails();
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
         showAppMessage('Gagal memuat Google API. Periksa konsol.', 'error');
@@ -1015,6 +1145,33 @@
         callback: '', // akan didefinisikan saat request
       });
       gisInited = true;
+    }
+
+    function fetchAllowedEmails() {
+      if (!gapiInited || !gisInited) {
+        showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
+        return;
+      }
+
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'JAM IZIN KELUAR!A2:B', // Ambil data dari kolom A dan B, mulai dari baris 2
+      }).then((response) => {
+        const rows = response.result.values;
+        if (rows && rows.length > 0) {
+          allowedEmails = rows.map(row => row[0]); // Ambil email dari kolom pertama
+          console.log('Allowed emails loaded:', allowedEmails);
+        } else {
+          console.log('No data found in the spreadsheet.');
+        }
+      }, (error) => {
+        console.error('Error fetching allowed emails:', error);
+        showAppMessage('Error: ' + error.result.error.message, 'error');
+      });
+    }
+
+    function isEmailAllowed(email) {
+      return allowedEmails.includes(email);
     }
 
     function handleAuthClick() {
@@ -1084,6 +1241,11 @@
     function clearFormFields() {
       document.getElementById('loginEmail').value = '';
       document.getElementById('loginPassword').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerName').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('passwordStrength').classList.add('hidden');
     }
 
     function checkSession() {
@@ -1132,6 +1294,8 @@
       checkSession();
       
       document.getElementById('loginPassword').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+      document.getElementById('registerPassword').addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
+      document.getElementById('confirmPassword').addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
       document.getElementById('currentPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
       document.getElementById('newPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
       document.getElementById('confirmNewPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
