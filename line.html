@@ -887,7 +887,7 @@
       historyLoaded = false;
     }
 
-    // --- LOGIKA HISTORY & DASHBOARD ---
+    // --- LOGIKA HISTORY & DASHBOARD (DIMODIFIKASI) ---
     function loadHistory() {
       if (!currentUser) return;
       const history = getUserHistory(currentUser.email);
@@ -897,64 +897,29 @@
       if (history.length === 0) {
         historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
       } else {
-        const dashboard = document.createElement('div');
-        dashboard.className = 'dashboard';
-        
-        const totalSessions = history.length;
+        // --- HANYA MENGHITUNG TOTAL DURASI ---
         const totalDurationMs = history.reduce((total, item) => {
-            if (item.duration) {
-                const [h, m, s] = item.duration.split(':').map(Number);
-                return total + h * 3600 + m * 60 + s;
-            }
-            return total;
+          if (item.duration) {
+            const [h, m, s] = item.duration.split(':').map(Number);
+            return total + h * 3600 + m * 60 + s;
+          }
+          return total;
         }, 0);
         
         const totalHours = Math.floor(totalDurationMs / 3600);
         const totalMinutes = Math.floor((totalDurationMs % 3600) / 60);
         const formattedTotalDuration = `${totalHours.toString().padStart(2, '0')}:${totalMinutes.toString().padStart(2, '0')}:00`;
         
-        const avgDurationSeconds = totalDurationMs / totalSessions;
-        const avgHours = Math.floor(avgDurationSeconds / 3600);
-        const avgMinutes = Math.floor((avgDurationSeconds % 3600) / 60);
-        const formattedAvgDuration = `${avgHours.toString().padStart(2, '0')}:${avgMinutes.toString().padStart(2, '0')}:00`;
+        // --- MEMBUAT TAMPILAN DASHBOARD SEDERHANA ---
+        const dashboard = document.createElement('div');
+        dashboard.className = 'dashboard';
+        dashboard.style.gridTemplateColumns = '1fr'; // Membuat kartu memenuhi lebar
         
-        let maxDurationSeconds = 0;
-        let maxDurationEntry = null;
-        history.forEach(item => {
-            if (item.duration) {
-                const [h, m, s] = item.duration.split(':').map(Number);
-                const totalSeconds = h * 3600 + m * 60 + s;
-                if (totalSeconds > maxDurationSeconds) {
-                    maxDurationSeconds = totalSeconds;
-                    maxDurationEntry = item;
-                }
-            }
-        });
-        
-        const maxHours = Math.floor(maxDurationSeconds / 3600);
-        const maxMinutes = Math.floor((maxDurationSeconds % 3600) / 60);
-        const formattedMaxDuration = `${maxHours.toString().padStart(2, '0')}:${maxMinutes.toString().padStart(2, '0')}:00`;
-        
-        dashboard.innerHTML += `
+        dashboard.innerHTML = `
           <div class="dashboard-card" onclick="showFullHistory()">
-            <div class="card-title">Total Sesi Izin Keluar</div>
-            <div class="card-value">${totalSessions}</div>
-            <div class="card-detail">Jumlah total sesi yang telah selesai</div>
-          </div>
-          <div class="dashboard-card" onclick="showFullHistory()">
-            <div class="card-title">Total Durasi</div>
+            <div class="card-title">Total Durasi Izin Keluar</div>
             <div class="card-value">${formattedTotalDuration}</div>
-            <div class="card-detail">${totalHours} jam ${totalMinutes} menit</div>
-          </div>
-          <div class="dashboard-card" onclick="showFullHistory()">
-            <div class="card-title">Rata-rata Durasi</div>
-            <div class="card-value">${formattedAvgDuration}</div>
-            <div class="card-detail">Rata-rata waktu per sesi</div>
-          </div>
-          <div class="dashboard-card" onclick="showFullHistory()">
-            <div class="card-title">Durasi Terpanjang</div>
-            <div class="card-value">${formattedMaxDuration}</div>
-            <div class="card-detail">Pada ${maxDurationEntry ? maxDurationEntry.startTime.split(' ')[0] : '-'}</div>
+            <div class="card-detail">Total waktu yang telah dihabiskan untuk izin keluar</div>
           </div>
         `;
         
