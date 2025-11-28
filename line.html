@@ -380,9 +380,28 @@
       #timerDisplay { font-size: 24px; }
       .dashboard { grid-template-columns: 1fr; }
     }
+    
+    /* New styles for Google Sheets export */
+    .export-btn {
+      background: linear-gradient(45deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.5));
+      border: 1px solid rgba(76, 175, 80, 0.5);
+    }
+    
+    .export-btn:hover {
+      background: linear-gradient(45deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.6));
+      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    }
+    
+    .auth-status {
+      font-size: 12px;
+      margin: 5px 0;
+      color: var(--text-secondary);
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- Google Sheets API -->
+  <script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
   <div id="mainContainer">
@@ -487,6 +506,17 @@
     const DB_USERS_KEY = 'izinKeluarUsers';
     const DB_HISTORY_KEY = 'izinKeluarHistory';
     const APP_STATE_KEY = 'izinKeluarAppState';
+
+    // Google Sheets API Configuration
+    const API_KEY = 'AIzaSyAaSy7BhnH-8VzF3aFq9R9p9R9p9R9p9R9p'; // Ganti dengan API Key Anda
+    const CLIENT_ID = '1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com'; // Ganti dengan Client ID Anda
+    const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+    
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+    let isGoogleAuthorized = false;
 
     // Inisialisasi database pengguna jika belum ada
     function initializeUserDatabase() {
@@ -741,6 +771,8 @@
         document.getElementById('appContainer').classList.remove('hidden');
         saveAppState();
         checkUnfinishedTimer();
+        // Initialize Google API after login
+        initializeGapi();
       } else {
         showMessage(messageElement, response.message, 'error');
       }
@@ -752,6 +784,7 @@
         endTimer();
       }
       currentUser = null;
+      isGoogleAuthorized = false;
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('changePasswordContainer').classList.add('hidden');
       document.getElementById('authContainer').classList.remove('hidden');
@@ -803,6 +836,11 @@
             <div class="card-value"><i class="no-print">🖨️</i></div>
             <div class="card-detail">Klik untuk mencetak</div>
           </div>
+          <div class="dashboard-card" onclick="exportToGoogleSheets()">
+            <div class="card-title">Export ke Google Sheets</div>
+            <div class="card-value"><i class="no-print">📊</i></div>
+            <div class="card-detail">Klik untuk export</div>
+          </div>
         `;
         
         const viewDetailsBtn = document.createElement('button');
@@ -849,7 +887,8 @@
       buttonRow.style.display = 'flex'; buttonRow.style.gap = '10px'; buttonRow.style.marginTop = '15px';
       const backBtn = document.createElement('button'); backBtn.textContent = 'Kembali ke Dashboard'; backBtn.onclick = loadHistory;
       const printBtn = document.createElement('button'); printBtn.textContent = 'Cetak History'; printBtn.onclick = printHistory;
-      buttonRow.appendChild(backBtn); buttonRow.appendChild(printBtn);
+      const exportBtn = document.createElement('button'); exportBtn.textContent = 'Export ke Google Sheets'; exportBtn.className = 'export-btn'; exportBtn.onclick = exportToGoogleSheets;
+      buttonRow.appendChild(backBtn); buttonRow.appendChild(printBtn); buttonRow.appendChild(exportBtn);
       historyContainer.appendChild(buttonRow);
     }
 
@@ -948,6 +987,94 @@
       }
     }
 
+    // --- GOOGLE SHEETS API FUNCTIONS ---
+    function initializeGapi() {
+      gapi.load('client', initializeGapiClient);
+    }
+
+    function initializeGapiClient() {
+      gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: DISCOVERY_DOCS,
+      }).then(() => {
+        gapiInited = true;
+        initializeGis();
+      });
+    }
+
+    function initializeGis() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined at request time
+      });
+      gisInited = true;
+    }
+
+    function handleAuthClick() {
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          throw (resp);
+        }
+        isGoogleAuthorized = true;
+        showAppMessage('Berhasil terautentikasi dengan Google Sheets', 'success');
+        exportToGoogleSheets();
+      };
+
+      if (gapi.client.getToken() === null) {
+        // Prompt the user to select a Google Account and ask for consent to share their data
+        tokenClient.requestAccessToken({prompt: 'consent'});
+      } else {
+        // Skip display of account chooser and consent dialog for an existing session.
+        tokenClient.requestAccessToken({prompt: ''});
+      }
+    }
+
+    function exportToGoogleSheets() {
+      if (!gapiInited || !gisInited) {
+        showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
+        return;
+      }
+
+      if (!isGoogleAuthorized) {
+        handleAuthClick();
+        return;
+      }
+
+      const history = getUserHistory(currentUser.email);
+      
+      if (history.length === 0) {
+        showAppMessage('Tidak ada data history untuk diekspor', 'error');
+        return;
+      }
+
+      // Format data for Google Sheets
+      const data = history.map(item => [
+        item.name,
+        item.startTime,
+        item.endTime,
+        item.duration
+      ]);
+
+      // Add headers
+      data.unshift(['Nama', 'Jam Mulai', 'Jam Selesai', 'Durasi']);
+
+      // Call the Sheets API
+      gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', // Ganti dengan ID spreadsheet Anda
+        range: 'jam izin keluar!A1', // Ganti dengan nama sheet Anda
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: data
+        }
+      }).then((response) => {
+        showAppMessage(`Berhasil mengekspor ${history.length} data ke Google Sheets`, 'success');
+      }, (error) => {
+        showAppMessage('Error: ' + error.result.error.message, 'error');
+        console.error('Error exporting to Google Sheets:', error);
+      });
+    }
+
     // --- INISIALISASI & EVENT LISTENERS ---
     function clearFormFields() {
       document.getElementById('loginEmail').value = '';
@@ -967,6 +1094,8 @@
           document.getElementById('appContainer').classList.remove('hidden');
           loadAppState();
           checkUnfinishedTimer();
+          // Initialize Google API after session check
+          initializeGapi();
         } else {
           clearAppState();
         }
