@@ -361,6 +361,23 @@
     
     .print-table tr:nth-child(even) { background-color: rgba(255, 105, 180, 0.05) !important; }
     
+    /* New styles for Google Sheets export */
+    .export-btn {
+      background: linear-gradient(45deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.5));
+      border: 1px solid rgba(76, 175, 80, 0.5);
+    }
+    
+    .export-btn:hover {
+      background: linear-gradient(45deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.6));
+      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .auth-status {
+        font-size: 12px;
+        margin-top: 5px;
+        color: var(--text-secondary);
+    }
+    
     @media print {
       body * { visibility: hidden; }
       #printContainer, #printContainer * { visibility: visible; }
@@ -380,28 +397,12 @@
       #timerDisplay { font-size: 24px; }
       .dashboard { grid-template-columns: 1fr; }
     }
-    
-    /* New styles for Google Sheets export */
-    .export-btn {
-      background: linear-gradient(45deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.5));
-      border: 1px solid rgba(76, 175, 80, 0.5);
-    }
-    
-    .export-btn:hover {
-      background: linear-gradient(45deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.6));
-      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-    }
-    
-    .auth-status {
-      font-size: 12px;
-      margin: 5px 0;
-      color: var(--text-secondary);
-    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <!-- Google Sheets API -->
+  <!-- Google API Library -->
   <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div id="mainContainer">
@@ -507,9 +508,12 @@
     const DB_HISTORY_KEY = 'izinKeluarHistory';
     const APP_STATE_KEY = 'izinKeluarAppState';
 
-    // Google Sheets API Configuration
-    const API_KEY = 'AIzaSyAaSy7BhnH-8VzF3aFq9R9p9R9p9R9p9R9p'; // Ganti dengan API Key Anda
-    const CLIENT_ID = '1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com'; // Ganti dengan Client ID Anda
+    // --- KONFIGURASI GOOGLE SHEETS API ---
+    // !!! GANTI DENGAN KREDENSIAL ANDA !!!
+    const API_KEY = 'MASUKKAN_API_KEY_ANDA_DISINI';
+    const CLIENT_ID = 'MASUKKAN_CLIENT_ID_ANDA_DISINI';
+    const SPREADSHEET_ID = 'MASUKKAN_SPREADSHEET_ID_KELUAR_AGUENG_DISINI';
+    
     const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
     const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
     
@@ -685,7 +689,6 @@
       document.getElementById('endBtn').disabled = false;
       saveAppState();
       
-      // Simpan sesi aktif
       const activeSession = { email: currentUser.email, startTime: formatDateTime(startTime) };
       localStorage.setItem('activeSession', JSON.stringify(activeSession));
     }
@@ -771,7 +774,7 @@
         document.getElementById('appContainer').classList.remove('hidden');
         saveAppState();
         checkUnfinishedTimer();
-        // Initialize Google API after login
+        // Inisialisasi Google API setelah login berhasil
         initializeGapi();
       } else {
         showMessage(messageElement, response.message, 'error');
@@ -784,7 +787,7 @@
         endTimer();
       }
       currentUser = null;
-      isGoogleAuthorized = false;
+      isGoogleAuthorized = false; // Reset status otorisasi Google
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('changePasswordContainer').classList.add('hidden');
       document.getElementById('authContainer').classList.remove('hidden');
@@ -999,6 +1002,9 @@
       }).then(() => {
         gapiInited = true;
         initializeGis();
+      }, (error) => {
+        console.error('Error initializing GAPI client:', error);
+        showAppMessage('Gagal memuat Google API. Periksa konsol.', 'error');
       });
     }
 
@@ -1006,7 +1012,7 @@
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
-        callback: '', // defined at request time
+        callback: '', // akan didefinisikan saat request
       });
       gisInited = true;
     }
@@ -1018,14 +1024,13 @@
         }
         isGoogleAuthorized = true;
         showAppMessage('Berhasil terautentikasi dengan Google Sheets', 'success');
-        exportToGoogleSheets();
+        // Panggil kembali fungsi export setelah otorisasi berhasil
+        exportToGoogleSheets(); 
       };
 
       if (gapi.client.getToken() === null) {
-        // Prompt the user to select a Google Account and ask for consent to share their data
         tokenClient.requestAccessToken({prompt: 'consent'});
       } else {
-        // Skip display of account chooser and consent dialog for an existing session.
         tokenClient.requestAccessToken({prompt: ''});
       }
     }
@@ -1048,7 +1053,7 @@
         return;
       }
 
-      // Format data for Google Sheets
+      // Format data untuk Google Sheets
       const data = history.map(item => [
         item.name,
         item.startTime,
@@ -1056,19 +1061,19 @@
         item.duration
       ]);
 
-      // Add headers
+      // Tambahkan header
       data.unshift(['Nama', 'Jam Mulai', 'Jam Selesai', 'Durasi']);
 
-      // Call the Sheets API
+      // Panggil Sheets API untuk menulis data
       gapi.client.sheets.spreadsheets.values.update({
-        spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', // Ganti dengan ID spreadsheet Anda
-        range: 'jam izin keluar!A1', // Ganti dengan nama sheet Anda
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'JAM IZIN KELUAR!A1', // Nama sheet dan cell awal
         valueInputOption: 'USER_ENTERED',
         resource: {
           values: data
         }
       }).then((response) => {
-        showAppMessage(`Berhasil mengekspor ${history.length} data ke Google Sheets`, 'success');
+        showAppMessage(`Berhasil mengekspor ${history.length} data ke sheet "JAM IZIN KELUAR"`, 'success');
       }, (error) => {
         showAppMessage('Error: ' + error.result.error.message, 'error');
         console.error('Error exporting to Google Sheets:', error);
@@ -1094,7 +1099,7 @@
           document.getElementById('appContainer').classList.remove('hidden');
           loadAppState();
           checkUnfinishedTimer();
-          // Initialize Google API after session check
+          // Inisialisasi Google API setelah session check
           initializeGapi();
         } else {
           clearAppState();
