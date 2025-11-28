@@ -432,7 +432,7 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <!-- Google API Library -->
+  <!-- Google API Library (Hanya diperlukan jika fitur export digunakan) -->
   <script src="https://apis.google.com/js/api.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -459,7 +459,7 @@
         </div>
         <button onclick="login()">Login</button>
         <div class="switch-form">
-          Gunakan email dari daftar staf dan password yang telah Anda daftarkan
+          Gunakan email dan password yang telah Anda daftarkan
         </div>
       </div>
       
@@ -468,7 +468,7 @@
         <div class="form-group">
           <label for="registerEmail">Email:</label>
           <input type="email" id="registerEmail" required placeholder="Masukkan email Anda">
-          <div class="auth-status">Hanya email yang terdaftar di sistem yang bisa digunakan</div>
+          <div class="auth-status">Gunakan email yang valid dan Anda ingat</div>
         </div>
         <div class="form-group">
           <label for="registerName">Nama Lengkap:</label>
@@ -573,20 +573,18 @@
     const APP_STATE_KEY = 'izinKeluarAppState';
 
     // --- KONFIGURASI GOOGLE SHEETS API ---
-    // !!! PASTIKAN ANDA SUDAH MENGISI INI !!!
+    // !!! ISI JIKA INGIN MENGGUNAKAN FITUR EXPORT !!!
     const API_KEY = 'MASUKKAN_API_KEY_ANDA_DISINI';
     const CLIENT_ID = 'MASUKKAN_CLIENT_ID_ANDA_DISINI';
     const SPREADSHEET_ID = 'MASUKKAN_SPREADSHEET_ID_KELUAR_AGUENG_DISINI';
     
     const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'; // Scope readonly untuk membaca
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets'; // Scope read/write untuk export
     
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
     let isGoogleAuthorized = false;
-    let allowedEmails = [];
-    let isEmailListLoaded = false; // Flag baru untuk menandai status pemuatan
 
     // --- VARIABEL GLOBAL ---
     let timerInterval;
@@ -753,13 +751,6 @@
     }
 
     function register() {
-      // Cek apakah daftar email sudah dimuat
-      if (!isEmailListLoaded) {
-        const messageElement = document.getElementById('registerMessage');
-        showMessage(messageElement, 'Daftar email yang diizinkan masih dimuat. Silakan tunggu sejenak.', 'error');
-        return;
-      }
-
       const email = document.getElementById('registerEmail').value.trim();
       const name = document.getElementById('registerName').value.trim();
       const password = document.getElementById('registerPassword').value.trim();
@@ -778,12 +769,6 @@
       
       if (password !== confirmPassword) {
         showMessage(messageElement, 'Password tidak cocok', 'error');
-        return;
-      }
-      
-      // Check if email is allowed
-      if (!isEmailAllowed(email)) {
-        showMessage(messageElement, 'Email tidak terdaftar di sistem. Silakan gunakan email yang terdaftar.', 'error');
         return;
       }
       
@@ -867,7 +852,8 @@
         document.getElementById('appContainer').classList.remove('hidden');
         saveAppState();
         checkUnfinishedTimer();
-        initializeGapi(); // Inisialisasi Google API untuk fitur export
+        // Inisialisasi Google API hanya jika diperlukan untuk export
+        initializeGapi(); 
       } else {
         showMessage(messageElement, response.message, 'error');
       }
@@ -1110,7 +1096,7 @@
       }
     }
 
-    // --- GOOGLE SHEETS API FUNCTIONS ---
+    // --- GOOGLE SHEETS API FUNCTIONS (UNTUK FITUR EXPORT) ---
     function initializeGapi() {
       gapi.load('client', initializeGapiClient);
     }
@@ -1122,17 +1108,9 @@
       }).then(() => {
         gapiInited = true;
         initializeGis();
-        // Panggil fetchAllowedEmails hanya saat di halaman login/registrasi
-        if (document.getElementById('authContainer').classList.contains('hidden') === false) {
-            fetchAllowedEmails();
-        }
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
-        // Tampilkan error di halaman login
-        const loginMsg = document.getElementById('loginMessage');
-        const registerMsg = document.getElementById('registerMessage');
-        if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Pendaftaran mungkin tidak berfungsi.', 'error');
-        if(registerMsg) showMessage(registerMsg, 'Gagal memuat Google API. Pendaftaran mungkin tidak berfungsi.', 'error');
+        showAppMessage('Gagal memuat Google API. Fitur export mungkin tidak berfungsi.', 'error');
       });
     }
 
@@ -1143,44 +1121,6 @@
         callback: '',
       });
       gisInited = true;
-    }
-
-    function fetchAllowedEmails() {
-      if (!gapiInited) {
-        console.error('GAPI client not initialized');
-        return;
-      }
-      
-      // Tampilkan status loading di tab registrasi
-      const registerTab = document.getElementById('registerTab');
-      const registerBtn = registerTab.querySelector('button');
-      const registerMsg = document.getElementById('registerMessage');
-      if(registerBtn) registerBtn.disabled = true;
-      if(registerMsg) showMessage(registerMsg, 'Memuat daftar email yang diizinkan...', 'success');
-
-      gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: 'JAM IZIN KELUAR!A2:B', // Ambil data dari kolom A, mulai dari baris 2
-      }).then((response) => {
-        const rows = response.result.values;
-        if (rows && rows.length > 0) {
-          allowedEmails = rows.map(row => String(row[0]).trim()); // Ambil email dari kolom pertama
-          isEmailListLoaded = true;
-          console.log('Allowed emails loaded:', allowedEmails);
-          if(registerMsg) registerMsg.classList.add('hidden'); // Sembunyikan pesan loading
-          if(registerBtn) registerBtn.disabled = false; // Aktifkan tombol
-        } else {
-          console.log('No data found in the spreadsheet.');
-          if(registerMsg) showMessage(registerMsg, 'Tidak menemukan email di Google Sheets. Periksa Sheet dan Range.', 'error');
-        }
-      }, (error) => {
-        console.error('Error fetching allowed emails:', error);
-        if(registerMsg) showMessage(registerMsg, 'Gagal mengambil data dari Google Sheets. Periksa console untuk detail error.', 'error');
-      });
-    }
-
-    function isEmailAllowed(email) {
-      return allowedEmails.includes(email);
     }
 
     function handleAuthClick() {
@@ -1236,7 +1176,7 @@
         }
       }).then((response) => {
         showAppMessage(`Berhasil mengekspor ${history.length} data ke sheet "JAM IZIN KELUAR"`, 'success');
-      }, (error) => {
+      }, (error) {
         showAppMessage('Error: ' + error.result.error.message, 'error');
         console.error('Error exporting to Google Sheets:', error);
       });
@@ -1303,15 +1243,7 @@
       initializeUserDatabase();
       setInterval(updateDigitalClock, 1000);
       updateDigitalClock();
-      
-      // Cek sesi dulu
-      if (!localStorage.getItem(APP_STATE_KEY)) {
-        // Jika tidak ada sesi, inisialisasi GAPI untuk ambil daftar email
-        initializeGapi();
-      } else {
-        // Jika ada sesi, langsung cek
-        checkSession();
-      }
+      checkSession();
       
       // Event Listeners
       const loginPassword = document.getElementById('loginPassword');
