@@ -451,7 +451,7 @@
         <div id="loginMessage" class="message hidden"></div>
         <div class="form-group">
           <label for="loginEmail">Email:</label>
-          <input type="email" id="loginEmail" required placeholder="Masukkan email Anda">
+          <input type="email" id="loginEmail" required placeholder="Masukkan email Gmail Anda">
         </div>
         <div class="form-group">
           <label for="loginPassword">Password:</label>
@@ -459,16 +459,16 @@
         </div>
         <button onclick="login()">Login</button>
         <div class="switch-form">
-          Gunakan email dari daftar staf dan password yang telah Anda daftarkan
+          Gunakan alamat Gmail dan password yang telah Anda daftarkan
         </div>
       </div>
       
       <div id="registerTab" class="tab-content">
         <div id="registerMessage" class="message hidden"></div>
         <div class="form-group">
-          <label for="registerEmail">Email:</label>
-          <input type="email" id="registerEmail" required placeholder="Masukkan email Anda">
-          <div class="auth-status">Hanya email yang terdaftar di sistem yang bisa digunakan</div>
+          <label for="registerEmail">Email Gmail:</label>
+          <input type="email" id="registerEmail" required placeholder="Masukkan alamat Gmail Anda">
+          <div class="auth-status">Hanya alamat Gmail yang bisa digunakan untuk mendaftar</div>
         </div>
         <div class="form-group">
           <label for="registerName">Nama Lengkap:</label>
@@ -752,14 +752,12 @@
       else { strengthElement.textContent = 'Kuat'; strengthElement.className = 'password-strength strength-strong'; }
     }
 
-    function register() {
-      // Cek apakah daftar email sudah dimuat
-      if (!isEmailListLoaded) {
-        const messageElement = document.getElementById('registerMessage');
-        showMessage(messageElement, 'Daftar email yang diizinkan masih dimuat. Silakan tunggu sejenak.', 'error');
-        return;
-      }
+    // Fungsi untuk memeriksa apakah email adalah Gmail
+    function isGmail(email) {
+      return email.toLowerCase().endsWith('@gmail.com');
+    }
 
+    function register() {
       const email = document.getElementById('registerEmail').value.trim();
       const name = document.getElementById('registerName').value.trim();
       const password = document.getElementById('registerPassword').value.trim();
@@ -781,9 +779,9 @@
         return;
       }
       
-      // Check if email is allowed
-      if (!isEmailAllowed(email)) {
-        showMessage(messageElement, 'Email tidak terdaftar di sistem. Silakan gunakan email yang terdaftar.', 'error');
+      // Check if email is Gmail
+      if (!isGmail(email)) {
+        showMessage(messageElement, 'Hanya alamat Gmail yang diperbolehkan untuk mendaftar', 'error');
         return;
       }
       
@@ -1122,17 +1120,12 @@
       }).then(() => {
         gapiInited = true;
         initializeGis();
-        // Panggil fetchAllowedEmails hanya saat di halaman login/registrasi
-        if (document.getElementById('authContainer').classList.contains('hidden') === false) {
-            fetchAllowedEmails();
-        }
+        // Tidak perlu lagi memanggil fetchAllowedEmails karena kita tidak memerlukannya
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
         // Tampilkan error di halaman login
         const loginMsg = document.getElementById('loginMessage');
-        const registerMsg = document.getElementById('registerMessage');
-        if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Pendaftaran mungkin tidak berfungsi.', 'error');
-        if(registerMsg) showMessage(registerMsg, 'Gagal memuat Google API. Pendaftaran mungkin tidak berfungsi.', 'error');
+        if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Fitur export mungkin tidak berfungsi.', 'error');
       });
     }
 
@@ -1145,42 +1138,10 @@
       gisInited = true;
     }
 
-    function fetchAllowedEmails() {
-      if (!gapiInited) {
-        console.error('GAPI client not initialized');
-        return;
-      }
-      
-      // Tampilkan status loading di tab registrasi
-      const registerTab = document.getElementById('registerTab');
-      const registerBtn = registerTab.querySelector('button');
-      const registerMsg = document.getElementById('registerMessage');
-      if(registerBtn) registerBtn.disabled = true;
-      if(registerMsg) showMessage(registerMsg, 'Memuat daftar email yang diizinkan...', 'success');
-
-      gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: 'JAM IZIN KELUAR!A2:B', // Ambil data dari kolom A, mulai dari baris 2
-      }).then((response) => {
-        const rows = response.result.values;
-        if (rows && rows.length > 0) {
-          allowedEmails = rows.map(row => String(row[0]).trim()); // Ambil email dari kolom pertama
-          isEmailListLoaded = true;
-          console.log('Allowed emails loaded:', allowedEmails);
-          if(registerMsg) registerMsg.classList.add('hidden'); // Sembunyikan pesan loading
-          if(registerBtn) registerBtn.disabled = false; // Aktifkan tombol
-        } else {
-          console.log('No data found in the spreadsheet.');
-          if(registerMsg) showMessage(registerMsg, 'Tidak menemukan email di Google Sheets. Periksa Sheet dan Range.', 'error');
-        }
-      }, (error) => {
-        console.error('Error fetching allowed emails:', error);
-        if(registerMsg) showMessage(registerMsg, 'Gagal mengambil data dari Google Sheets. Periksa console untuk detail error.', 'error');
-      });
-    }
-
+    // Fungsi isEmailAllowed tidak lagi diperlukan, tetapi kita biarkan untuk compatibility
     function isEmailAllowed(email) {
-      return allowedEmails.includes(email);
+      // Selalu mengembalikan true untuk email Gmail
+      return isGmail(email);
     }
 
     function handleAuthClick() {
@@ -1306,7 +1267,7 @@
       
       // Cek sesi dulu
       if (!localStorage.getItem(APP_STATE_KEY)) {
-        // Jika tidak ada sesi, inisialisasi GAPI untuk ambil daftar email
+        // Jika tidak ada sesi, inisialisasi GAPI untuk fitur export
         initializeGapi();
       } else {
         // Jika ada sesi, langsung cek
