@@ -555,6 +555,7 @@
         <thead>
           <tr>
             <th>No</th>
+            <th>Tanggal</th>
             <th>Waktu Mulai</th>
             <th>Waktu Selesai</th>
             <th>Durasi</th>
@@ -572,27 +573,20 @@
     const APP_STATE_KEY = 'izinKeluarAppState';
 
     // --- KONFIGURASI GOOGLE SHEETS API ---
-    // !!! GANTI DENGAN KREDENSIAL ANDA !!!
+    // !!! PASTIKAN ANDA SUDAH MENGISI INI !!!
     const API_KEY = 'MASUKKAN_API_KEY_ANDA_DISINI';
     const CLIENT_ID = 'MASUKKAN_CLIENT_ID_ANDA_DISINI';
     const SPREADSHEET_ID = 'MASUKKAN_SPREADSHEET_ID_KELUAR_AGUENG_DISINI';
     
     const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'; // Scope readonly untuk membaca
     
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
     let isGoogleAuthorized = false;
     let allowedEmails = [];
-
-    // Inisialisasi database pengguna jika belum ada
-    function initializeUserDatabase() {
-        if (!localStorage.getItem(DB_USERS_KEY)) {
-            const defaultUsers = {};
-            localStorage.setItem(DB_USERS_KEY, JSON.stringify(defaultUsers));
-        }
-    }
+    let isEmailListLoaded = false; // Flag baru untuk menandai status pemuatan
 
     // --- VARIABEL GLOBAL ---
     let timerInterval;
@@ -627,7 +621,7 @@
       messageElement.className = `message ${type}-message`;
       messageElement.textContent = message;
       const appContainer = document.getElementById('appContainer');
-      appContainer.insertBefore(messageElement, appContainer.firstChild);
+      if(appContainer) appContainer.insertBefore(messageElement, appContainer.firstChild);
       setTimeout(() => messageElement.remove(), 5000);
     }
 
@@ -670,7 +664,8 @@
       const now = new Date();
       const timeString = now.toLocaleTimeString('id-ID', {hour12: false});
       document.getElementById('digitalClock').textContent = timeString;
-      document.getElementById('digitalClockApp').textContent = timeString;
+      const appClock = document.getElementById('digitalClockApp');
+      if(appClock) appClock.textContent = timeString;
     }
 
     function updateTimerDisplay() {
@@ -724,18 +719,14 @@
 
     // --- TAB SWITCHING ---
     function switchTab(tabName) {
-      // Hide all tabs
       document.getElementById('loginTab').classList.remove('active');
       document.getElementById('registerTab').classList.remove('active');
       
-      // Remove active class from all tab buttons
       const tabs = document.querySelectorAll('.tab');
       tabs.forEach(tab => tab.classList.remove('active'));
       
-      // Show selected tab
       document.getElementById(tabName + 'Tab').classList.add('active');
       
-      // Add active class to clicked tab button
       if (tabName === 'login') {
         tabs[0].classList.add('active');
       } else {
@@ -762,6 +753,13 @@
     }
 
     function register() {
+      // Cek apakah daftar email sudah dimuat
+      if (!isEmailListLoaded) {
+        const messageElement = document.getElementById('registerMessage');
+        showMessage(messageElement, 'Daftar email yang diizinkan masih dimuat. Silakan tunggu sejenak.', 'error');
+        return;
+      }
+
       const email = document.getElementById('registerEmail').value.trim();
       const name = document.getElementById('registerName').value.trim();
       const password = document.getElementById('registerPassword').value.trim();
@@ -869,8 +867,7 @@
         document.getElementById('appContainer').classList.remove('hidden');
         saveAppState();
         checkUnfinishedTimer();
-        // Inisialisasi Google API setelah login berhasil
-        initializeGapi();
+        initializeGapi(); // Inisialisasi Google API untuk fitur export
       } else {
         showMessage(messageElement, response.message, 'error');
       }
@@ -882,7 +879,7 @@
         endTimer();
       }
       currentUser = null;
-      isGoogleAuthorized = false; // Reset status otorisasi Google
+      isGoogleAuthorized = false;
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('changePasswordContainer').classList.add('hidden');
       document.getElementById('authContainer').classList.remove('hidden');
@@ -902,14 +899,10 @@
       if (history.length === 0) {
         historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
       } else {
-        // Fokus pada history durasi
         const dashboard = document.createElement('div');
         dashboard.className = 'dashboard';
         
-        // Hitung total sesi
         const totalSessions = history.length;
-        
-        // Hitung total durasi dalam menit
         const totalDurationMs = history.reduce((total, item) => {
             if (item.duration) {
                 const [h, m, s] = item.duration.split(':').map(Number);
@@ -922,13 +915,11 @@
         const totalMinutes = Math.floor((totalDurationMs % 3600) / 60);
         const formattedTotalDuration = `${totalHours.toString().padStart(2, '0')}:${totalMinutes.toString().padStart(2, '0')}:00`;
         
-        // Hitung rata-rata durasi
         const avgDurationSeconds = totalDurationMs / totalSessions;
         const avgHours = Math.floor(avgDurationSeconds / 3600);
         const avgMinutes = Math.floor((avgDurationSeconds % 3600) / 60);
         const formattedAvgDuration = `${avgHours.toString().padStart(2, '0')}:${avgMinutes.toString().padStart(2, '0')}:00`;
         
-        // Cari durasi terpanjang
         let maxDurationSeconds = 0;
         let maxDurationEntry = null;
         history.forEach(item => {
@@ -1131,10 +1122,17 @@
       }).then(() => {
         gapiInited = true;
         initializeGis();
-        fetchAllowedEmails();
+        // Panggil fetchAllowedEmails hanya saat di halaman login/registrasi
+        if (document.getElementById('authContainer').classList.contains('hidden') === false) {
+            fetchAllowedEmails();
+        }
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
-        showAppMessage('Gagal memuat Google API. Periksa konsol.', 'error');
+        // Tampilkan error di halaman login
+        const loginMsg = document.getElementById('loginMessage');
+        const registerMsg = document.getElementById('registerMessage');
+        if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Pendaftaran mungkin tidak berfungsi.', 'error');
+        if(registerMsg) showMessage(registerMsg, 'Gagal memuat Google API. Pendaftaran mungkin tidak berfungsi.', 'error');
       });
     }
 
@@ -1142,31 +1140,42 @@
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
-        callback: '', // akan didefinisikan saat request
+        callback: '',
       });
       gisInited = true;
     }
 
     function fetchAllowedEmails() {
-      if (!gapiInited || !gisInited) {
-        showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
+      if (!gapiInited) {
+        console.error('GAPI client not initialized');
         return;
       }
+      
+      // Tampilkan status loading di tab registrasi
+      const registerTab = document.getElementById('registerTab');
+      const registerBtn = registerTab.querySelector('button');
+      const registerMsg = document.getElementById('registerMessage');
+      if(registerBtn) registerBtn.disabled = true;
+      if(registerMsg) showMessage(registerMsg, 'Memuat daftar email yang diizinkan...', 'success');
 
       gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
-        range: 'JAM IZIN KELUAR!A2:B', // Ambil data dari kolom A dan B, mulai dari baris 2
+        range: 'JAM IZIN KELUAR!A2:B', // Ambil data dari kolom A, mulai dari baris 2
       }).then((response) => {
         const rows = response.result.values;
         if (rows && rows.length > 0) {
-          allowedEmails = rows.map(row => row[0]); // Ambil email dari kolom pertama
+          allowedEmails = rows.map(row => String(row[0]).trim()); // Ambil email dari kolom pertama
+          isEmailListLoaded = true;
           console.log('Allowed emails loaded:', allowedEmails);
+          if(registerMsg) registerMsg.classList.add('hidden'); // Sembunyikan pesan loading
+          if(registerBtn) registerBtn.disabled = false; // Aktifkan tombol
         } else {
           console.log('No data found in the spreadsheet.');
+          if(registerMsg) showMessage(registerMsg, 'Tidak menemukan email di Google Sheets. Periksa Sheet dan Range.', 'error');
         }
       }, (error) => {
         console.error('Error fetching allowed emails:', error);
-        showAppMessage('Error: ' + error.result.error.message, 'error');
+        if(registerMsg) showMessage(registerMsg, 'Gagal mengambil data dari Google Sheets. Periksa console untuk detail error.', 'error');
       });
     }
 
@@ -1181,7 +1190,6 @@
         }
         isGoogleAuthorized = true;
         showAppMessage('Berhasil terautentikasi dengan Google Sheets', 'success');
-        // Panggil kembali fungsi export setelah otorisasi berhasil
         exportToGoogleSheets(); 
       };
 
@@ -1210,7 +1218,6 @@
         return;
       }
 
-      // Format data untuk Google Sheets
       const data = history.map(item => [
         item.name,
         item.startTime,
@@ -1218,13 +1225,11 @@
         item.duration
       ]);
 
-      // Tambahkan header
       data.unshift(['Nama', 'Jam Mulai', 'Jam Selesai', 'Durasi']);
 
-      // Panggil Sheets API untuk menulis data
       gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: 'JAM IZIN KELUAR!A1', // Nama sheet dan cell awal
+        range: 'JAM IZIN KELUAR!A1',
         valueInputOption: 'USER_ENTERED',
         resource: {
           values: data
@@ -1239,13 +1244,21 @@
 
     // --- INISIALISASI & EVENT LISTENERS ---
     function clearFormFields() {
-      document.getElementById('loginEmail').value = '';
-      document.getElementById('loginPassword').value = '';
-      document.getElementById('registerEmail').value = '';
-      document.getElementById('registerName').value = '';
-      document.getElementById('registerPassword').value = '';
-      document.getElementById('confirmPassword').value = '';
-      document.getElementById('passwordStrength').classList.add('hidden');
+      const loginEmail = document.getElementById('loginEmail');
+      const loginPassword = document.getElementById('loginPassword');
+      const registerEmail = document.getElementById('registerEmail');
+      const registerName = document.getElementById('registerName');
+      const registerPassword = document.getElementById('registerPassword');
+      const confirmPassword = document.getElementById('confirmPassword');
+      const passwordStrength = document.getElementById('passwordStrength');
+
+      if(loginEmail) loginEmail.value = '';
+      if(loginPassword) loginPassword.value = '';
+      if(registerEmail) registerEmail.value = '';
+      if(registerName) registerName.value = '';
+      if(registerPassword) registerPassword.value = '';
+      if(confirmPassword) confirmPassword.value = '';
+      if(passwordStrength) passwordStrength.classList.add('hidden');
     }
 
     function checkSession() {
@@ -1261,8 +1274,7 @@
           document.getElementById('appContainer').classList.remove('hidden');
           loadAppState();
           checkUnfinishedTimer();
-          // Inisialisasi Google API setelah session check
-          initializeGapi();
+          initializeGapi(); // Inisialisasi untuk fitur export
         } else {
           clearAppState();
         }
@@ -1291,15 +1303,38 @@
       initializeUserDatabase();
       setInterval(updateDigitalClock, 1000);
       updateDigitalClock();
-      checkSession();
       
-      document.getElementById('loginPassword').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
-      document.getElementById('registerPassword').addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
-      document.getElementById('confirmPassword').addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
-      document.getElementById('currentPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
-      document.getElementById('newPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
-      document.getElementById('confirmNewPassword').addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
+      // Cek sesi dulu
+      if (!localStorage.getItem(APP_STATE_KEY)) {
+        // Jika tidak ada sesi, inisialisasi GAPI untuk ambil daftar email
+        initializeGapi();
+      } else {
+        // Jika ada sesi, langsung cek
+        checkSession();
+      }
+      
+      // Event Listeners
+      const loginPassword = document.getElementById('loginPassword');
+      const registerPassword = document.getElementById('registerPassword');
+      const confirmPassword = document.getElementById('confirmPassword');
+      const currentPassword = document.getElementById('currentPassword');
+      const newPassword = document.getElementById('newPassword');
+      const confirmNewPassword = document.getElementById('confirmNewPassword');
+
+      if(loginPassword) loginPassword.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+      if(registerPassword) registerPassword.addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
+      if(confirmPassword) confirmPassword.addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
+      if(currentPassword) currentPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
+      if(newPassword) newPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
+      if(confirmNewPassword) confirmNewPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
     };
+
+    function initializeUserDatabase() {
+        if (!localStorage.getItem(DB_USERS_KEY)) {
+            const defaultUsers = {};
+            localStorage.setItem(DB_USERS_KEY, JSON.stringify(defaultUsers));
+        }
+    }
   </script>
 </body>
 </html>
