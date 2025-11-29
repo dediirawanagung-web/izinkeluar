@@ -724,6 +724,70 @@
       width: 0;
       transition: width 0.3s ease;
     }
+    
+    /* --- History Section Styling --- */
+    .history-section {
+      margin-top: 30px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .history-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+    }
+    
+    .history-title i {
+      margin-right: 10px;
+      color: var(--primary-color);
+    }
+    
+    .history-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .history-actions button {
+      padding: 8px 12px;
+      font-size: 14px;
+      flex: initial;
+    }
+    
+    .summary-card {
+      background-color: var(--card-bg-hover);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid var(--secondary-color);
+    }
+    
+    .summary-title {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--secondary-color);
+    }
+    
+    .history-table-container {
+      overflow-x: auto;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -803,9 +867,26 @@
         <button id="endBtn" onclick="endTimer()" disabled><span><i class="fas fa-stop button-icon"></i> End</span></button>
       </div>
       
-      <div id="historySection">
-        <button id="viewHistoryBtn" onclick="loadHistory()"><i class="fas fa-history button-icon"></i> Lihat Dashboard History</button>
-        <div id="historyContainer" class="hidden"></div>
+      <!-- History Section - Now displayed by default -->
+      <div id="historySection" class="history-section">
+        <div class="history-header">
+          <div class="history-title">
+            <i class="fas fa-history"></i>
+            <span>History Durasi Izin Keluar</span>
+          </div>
+          <div class="history-actions">
+            <button onclick="printHistory()" style="background-color: var(--secondary-color); color: white;">
+              <i class="fas fa-print button-icon"></i> Cetak
+            </button>
+            <button onclick="exportToGoogleSheets()" class="export-btn">
+              <i class="fas fa-file-export button-icon"></i> Export
+            </button>
+          </div>
+        </div>
+        
+        <div id="historyContainer">
+          <!-- History will be loaded here automatically -->
+        </div>
       </div>
       
       <div style="margin-top: 25px;">
@@ -1046,7 +1127,8 @@
         document.getElementById('endBtn').disabled = true;
       }, 300);
       
-      if (historyLoaded) loadHistory();
+      // Auto-refresh history after adding new entry
+      loadHistory();
       
       // Visual feedback for timer display
       const timerDisplay = document.getElementById('timerDisplay');
@@ -1201,6 +1283,9 @@
         checkUnfinishedTimer();
         initializeGapi();
         showAppMessage(`Selamat datang, ${currentUser.name}!`, 'success');
+        
+        // Auto-load history when user logs in
+        loadHistory();
       } else {
         showMessage(messageElement, response.message, 'error');
       }
@@ -1233,6 +1318,7 @@
       if (history.length === 0) {
         historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
       } else {
+        // Calculate total duration
         const totalDurationMs = history.reduce((total, item) => {
           if (item.duration) {
             const [h, m, s] = item.duration.split(':').map(Number);
@@ -1245,40 +1331,22 @@
         const totalMinutes = Math.floor((totalDurationMs % 3600) / 60);
         const formattedTotalDuration = `${totalHours} Jam ${totalMinutes} Menit`;
         
-        const dashboard = document.createElement('div');
-        dashboard.className = 'dashboard';
-        
-        dashboard.innerHTML = `
-          <div class="dashboard-card" onclick="showFullHistory()">
-            <i class="fas fa-clock"></i>
-            <div class="card-title">Total Durasi Izin Keluar</div>
-            <div class="card-value">${formattedTotalDuration}</div>
-            <div class="card-detail">Total waktu yang telah dihabiskan untuk izin keluar</div>
+        // Create summary card
+        const summaryCard = document.createElement('div');
+        summaryCard.className = 'summary-card';
+        summaryCard.innerHTML = `
+          <div class="summary-title">Total Durasi Izin Keluar</div>
+          <div class="summary-value">${formattedTotalDuration}</div>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
+            Berdasarkan ${history.length} catatan
           </div>
         `;
+        historyContainer.appendChild(summaryCard);
         
-        const viewDetailsBtn = document.createElement('button');
-        viewDetailsBtn.innerHTML = '<i class="fas fa-list-ul button-icon"></i> Lihat Detail Lengkap';
-        viewDetailsBtn.onclick = showFullHistory;
-        viewDetailsBtn.style.marginTop = '20px';
-        viewDetailsBtn.style.width = '100%';
+        // Create history table
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'history-table-container';
         
-        historyContainer.appendChild(dashboard);
-        historyContainer.appendChild(viewDetailsBtn);
-      }
-      
-      historyContainer.classList.remove('hidden');
-      historyLoaded = true;
-    }
-
-    function showFullHistory() {
-      const history = getUserHistory(currentUser.email);
-      const historyContainer = document.getElementById('historyContainer');
-      historyContainer.innerHTML = '<h3 style="color: var(--primary-color); margin-bottom: 20px; text-align: left;">History Lengkap</h3>';
-      
-      if (history.length === 0) {
-        historyContainer.innerHTML += '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
-      } else {
         const table = document.createElement('table');
         const headerRow = document.createElement('tr');
         ['No', 'Tanggal', 'Waktu Mulai', 'Waktu Selesai', 'Durasi'].forEach(text => {
@@ -1286,7 +1354,8 @@
         });
         table.appendChild(headerRow);
         
-        history.forEach((item, index) => {
+        // Add history entries (show most recent first)
+        history.slice().reverse().forEach((item, index) => {
           const row = document.createElement('tr');
           const date = item.startTime.split(' ')[0];
           const startTime = item.startTime.split(' ')[1];
@@ -1297,16 +1366,13 @@
           });
           table.appendChild(row);
         });
-        historyContainer.appendChild(table);
+        
+        tableContainer.appendChild(table);
+        historyContainer.appendChild(tableContainer);
       }
       
-      const buttonRow = document.createElement('div');
-      buttonRow.style.display = 'flex'; buttonRow.style.gap = '10px'; buttonRow.style.marginTop = '20px';
-      const backBtn = document.createElement('button'); backBtn.innerHTML = '<i class="fas fa-arrow-left button-icon"></i> Kembali'; backBtn.onclick = loadHistory;
-      const printBtn = document.createElement('button'); printBtn.innerHTML = '<i class="fas fa-print button-icon"></i> Cetak'; printBtn.onclick = printHistory;
-      const exportBtn = document.createElement('button'); exportBtn.innerHTML = '<i class="fas fa-file-export button-icon"></i> Export'; exportBtn.className = 'export-btn'; exportBtn.onclick = exportToGoogleSheets;
-      buttonRow.appendChild(backBtn); buttonRow.appendChild(printBtn); buttonRow.appendChild(exportBtn);
-      historyContainer.appendChild(buttonRow);
+      historyContainer.classList.remove('hidden');
+      historyLoaded = true;
     }
 
     function printHistory() {
@@ -1316,7 +1382,7 @@
       const printBody = document.getElementById('printHistoryBody'); printBody.innerHTML = '';
       
       if (history.length > 0) {
-        history.forEach((item, index) => {
+        history.slice().reverse().forEach((item, index) => {
           const row = document.createElement('tr');
           const date = item.startTime.split(' ')[0];
           const startTime = item.startTime.split(' ')[1];
@@ -1532,6 +1598,9 @@
           checkUnfinishedTimer();
           initializeGapi();
           showAppMessage(`Selamat datang kembali, ${currentUser.name}!`, 'success');
+          
+          // Auto-load history when session is restored
+          loadHistory();
         } else {
           clearAppState();
         }
