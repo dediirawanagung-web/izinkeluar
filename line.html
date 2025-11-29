@@ -799,6 +799,47 @@
       background-color: #f59e0b;
       box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
     }
+    
+    /* --- Fallback Mode --- */
+    .fallback-mode {
+      background-color: rgba(251, 191, 36, 0.1);
+      border: 1px solid var(--warning-color);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 13px;
+      color: var(--warning-color);
+    }
+    
+    .fallback-mode i {
+      margin-right: 8px;
+    }
+    
+    /* --- Manual Auth Button --- */
+    .manual-auth-btn {
+      background-color: var(--secondary-color);
+      color: white;
+      margin-top: 10px;
+      font-size: 14px;
+      padding: 10px 20px;
+    }
+    
+    .manual-auth-btn:hover {
+      background-color: #9333ea;
+      box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3);
+    }
+    
+    /* --- Debug Info --- */
+    .debug-info {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      padding: 8px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      text-align: left;
+      font-family: monospace;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -821,6 +862,12 @@
         <span id="statusText">Memuat Google API...</span>
       </div>
       
+      <!-- Fallback Mode Message -->
+      <div id="fallbackMode" class="fallback-mode hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Mode Offline: Menggunakan database lokal</span>
+      </div>
+      
       <div class="tab-container">
         <div class="tab active" onclick="switchTab('login')">Login</div>
         <div class="tab" onclick="switchTab('register')">Daftar</div>
@@ -836,9 +883,12 @@
           <label for="loginPassword">Password</label>
           <input type="password" id="loginPassword" required placeholder="Masukkan password Anda">
         </div>
-        <button id="loginBtn" onclick="login()" disabled><i class="fas fa-sign-in-alt button-icon"></i>Login</button>
+        <button id="loginBtn" onclick="login()"><i class="fas fa-sign-in-alt button-icon"></i>Login</button>
         <button id="retryInitBtn" class="retry-btn hidden" onclick="retryInitialization()">
           <i class="fas fa-redo button-icon"></i>Coba Lagi
+        </button>
+        <button id="manualAuthBtn" class="manual-auth-btn hidden" onclick="manualAuth()">
+          <i class="fas fa-key button-icon"></i>Otorisasi Manual
         </button>
         <div class="switch-form">
           Gunakan alamat Gmail dan password yang telah Anda daftarkan
@@ -865,11 +915,14 @@
           <label for="confirmPassword">Konfirmasi Password</label>
           <input type="password" id="confirmPassword" required placeholder="Ketik ulang password Anda">
         </div>
-        <button id="registerBtn" onclick="register()" disabled><i class="fas fa-user-plus button-icon"></i>Daftar</button>
+        <button id="registerBtn" onclick="register()"><i class="fas fa-user-plus button-icon"></i>Daftar</button>
         <div class="switch-form">
           Sudah punya akun? <a onclick="switchTab('login')">Login di sini</a>
         </div>
       </div>
+      
+      <!-- Debug Info (Hidden by default) -->
+      <div id="debugInfo" class="debug-info hidden"></div>
     </div>
     
     <div id="appContainer" class="container hidden">
@@ -969,6 +1022,8 @@
     const DB_USERS_KEY = 'izinKeluarUsers';
     const DB_HISTORY_KEY = 'izinKeluarHistory';
     const APP_STATE_KEY = 'izinKeluarAppState';
+    const DB_CACHE_KEY = 'izinKeluarDbCache';
+    const CACHE_EXPIRY_KEY = 'izinKeluarCacheExpiry';
 
     // --- KONFIGURASI GOOGLE SHEETS API ---
     const API_KEY = 'MASUKKAN_API_KEY_ANDA_DISINI';
@@ -987,6 +1042,9 @@
     let userData = {}; // Menyimpan data pengguna dari Google Sheets
     let initAttempts = 0;
     const MAX_INIT_ATTEMPTS = 3;
+    let initializationTimeout;
+    let isUsingFallback = false;
+    let apiInitStartTime;
 
     // --- VARIABEL GLOBAL ---
     let timerInterval;
@@ -1024,6 +1082,69 @@
                                      'var(--primary-color)';
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // --- DEBUG FUNCTION ---
+    function updateDebugInfo() {
+      if (localStorage.getItem('debugMode') === 'true') {
+        const debugInfo = document.getElementById('debugInfo');
+        debugInfo.classList.remove('hidden');
+        debugInfo.innerHTML = `
+          GAPI: ${gapiInited ? '✓' : '✗'} | 
+          GIS: ${gisInited ? '✓' : '✗'} | 
+          Auth: ${isGoogleAuthorized ? '✓' : '✗'} | 
+          DB: ${isEmailListLoaded ? '✓' : '✗'} | 
+          Fallback: ${isUsingFallback ? '✓' : '✗'} | 
+          Attempts: ${initAttempts}
+        `;
+      }
+    }
+
+    // --- CACHE MANAGEMENT ---
+    function isCacheValid() {
+      const cacheExpiry = localStorage.getItem(CACHE_EXPIRY_KEY);
+      if (!cacheExpiry) return false;
+      return new Date().getTime() < parseInt(cacheExpiry);
+    }
+
+    function saveCache(data) {
+      localStorage.setItem(DB_CACHE_KEY, JSON.stringify(data));
+      // Cache valid for 1 hour
+      localStorage.setItem(CACHE_EXPIRY_KEY, (new Date().getTime() + 3600000).toString());
+    }
+
+    function loadCache() {
+      if (isCacheValid()) {
+        const cachedData = localStorage.getItem(DB_CACHE_KEY);
+        if (cachedData) {
+          return JSON.parse(cachedData);
+        }
+      }
+      return null;
+    }
+
+    function clearCache() {
+      localStorage.removeItem(DB_CACHE_KEY);
+      localStorage.removeItem(CACHE_EXPIRY_KEY);
+    }
+
+    // --- FALLBACK MODE ---
+    function enableFallbackMode() {
+      isUsingFallback = true;
+      document.getElementById('fallbackMode').classList.remove('hidden');
+      updateApiStatus('connected', 'Mode Offline: Database Lokal');
+      enableAuthButtons();
+      showAppMessage('Menggunakan mode offline. Data akan disimpan lokal.', 'warning');
+      
+      // Load from localStorage if available
+      const localUsers = localStorage.getItem(DB_USERS_KEY);
+      if (localUsers) {
+        userData = JSON.parse(localUsers);
+        allowedEmails = Object.keys(userData);
+        isEmailListLoaded = true;
+      }
+      
+      updateDebugInfo();
     }
 
     // --- MANAJEMEN STATE APLIKASI ---
@@ -1195,8 +1316,26 @@
 
     // --- FUNGSI UNTUK GOOGLE SHEETS ---
     function loadUserDatabase() {
+      // Try to load from cache first
+      const cachedData = loadCache();
+      if (cachedData && !isUsingFallback) {
+        userData = cachedData.userData;
+        allowedEmails = cachedData.allowedEmails;
+        isEmailListLoaded = true;
+        updateApiStatus('connected', 'Terhubung (Cache)');
+        enableAuthButtons();
+        checkPendingLogin();
+        updateDebugInfo();
+        return true;
+      }
+      
+      if (isUsingFallback) {
+        // Already in fallback mode
+        return true;
+      }
+      
       if (!gapiInited || !gisInited) {
-        updateApiStatus('loading', 'API belum siap. Silakan tunggu...');
+        updateApiStatus('loading', 'API belum siap. Menunggu...');
         return false;
       }
 
@@ -1230,27 +1369,45 @@
             }
           }
           
+          // Save to cache
+          saveCache({ userData, allowedEmails });
+          
           isEmailListLoaded = true;
           updateApiStatus('connected', 'Terhubung ke Google Sheets');
           enableAuthButtons();
           showAppMessage('Database pengguna berhasil dimuat', 'success');
-          
-          // Check if user was trying to login before API was ready
           checkPendingLogin();
         } else {
           updateApiStatus('disconnected', 'Tidak ada data pengguna di spreadsheet');
           showAppMessage('Tidak ada data pengguna di spreadsheet', 'error');
         }
+        updateDebugInfo();
       }, (error) => {
-        updateApiStatus('disconnected', 'Error: ' + error.result.error.message);
-        showAppMessage('Error: ' + error.result.error.message, 'error');
         console.error('Error loading user database:', error);
+        updateApiStatus('disconnected', 'Error: ' + (error.result?.error?.message || error.message));
+        
+        // Try fallback after 2 failed attempts
+        if (initAttempts >= 2) {
+          showAppMessage('Gagal memuat dari Google Sheets. Menggunakan mode offline...', 'warning');
+          setTimeout(() => enableFallbackMode(), 1000);
+        }
       });
       
       return true;
     }
 
     function updateUserPassword(email, newPassword) {
+      if (isUsingFallback) {
+        // Save to localStorage in fallback mode
+        if (!userData[email]) {
+          userData[email] = {};
+        }
+        userData[email].password = newPassword;
+        localStorage.setItem(DB_USERS_KEY, JSON.stringify(userData));
+        showAppMessage('Password berhasil diperbarui (mode offline)', 'success');
+        return true;
+      }
+      
       if (!gapiInited || !gisInited) {
         showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
         return false;
@@ -1277,12 +1434,12 @@
         }
       }).then((response) => {
         userData[email].password = newPassword;
+        // Update cache
+        saveCache({ userData, allowedEmails });
         showAppMessage('Password berhasil diperbarui di Google Sheets', 'success');
-        return true;
       }, (error) => {
-        showAppMessage('Error: ' + error.result.error.message, 'error');
         console.error('Error updating password:', error);
-        return false;
+        showAppMessage('Error: ' + (error.result?.error?.message || error.message), 'error');
       });
       
       return true;
@@ -1315,22 +1472,25 @@
         return;
       }
       
-      // Load user database if not already loaded
-      if (!isEmailListLoaded) {
-        if (!loadUserDatabase()) {
-          showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
-          // Store registration data to try again after loading
-          localStorage.setItem('pendingRegistration', JSON.stringify({
-            email, name, password, confirmPassword
-          }));
+      // In fallback mode, allow any Gmail
+      if (!isUsingFallback) {
+        // Load user database if not already loaded
+        if (!isEmailListLoaded) {
+          if (!loadUserDatabase()) {
+            showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
+            // Store registration data to try again after loading
+            localStorage.setItem('pendingRegistration', JSON.stringify({
+              email, name, password, confirmPassword
+            }));
+            return;
+          }
+        }
+        
+        // Check if email is in allowed list
+        if (!allowedEmails.includes(email)) {
+          showMessage(messageElement, 'Email tidak terdaftar dalam sistem. Hubungi administrator.', 'error');
           return;
         }
-      }
-      
-      // Check if email is in allowed list
-      if (!allowedEmails.includes(email)) {
-        showMessage(messageElement, 'Email tidak terdaftar dalam sistem. Hubungi administrator.', 'error');
-        return;
       }
       
       // Check if user already has a password
@@ -1339,13 +1499,16 @@
         return;
       }
       
-      // Update password in Google Sheets
+      // Update password
       if (!updateUserPassword(email, password)) {
         showMessage(messageElement, 'Gagal memperbarui password. Silakan coba lagi.', 'error');
         return;
       }
       
       // Update local data
+      if (!userData[email]) {
+        userData[email] = {};
+      }
       userData[email].password = password;
       
       showMessage(messageElement, 'Registrasi berhasil! Silakan login dengan akun Anda.', 'success');
@@ -1363,9 +1526,9 @@
       }, 2000);
     }
 
-    // --- LOGIKA AUTENTIKASI (GOOGLE SHEETS) ---
+    // --- LOGIKA AUTENTIKASI ---
     function loginUser(email, password) {
-      if (!isEmailListLoaded) {
+      if (!isUsingFallback && !isEmailListLoaded) {
         return { status: "error", message: "Database pengguna belum dimuat. Silakan coba lagi." };
       }
       
@@ -1388,7 +1551,7 @@
     }
 
     function changeUserPassword(email, currentPassword, newPassword) {
-      if (!isEmailListLoaded) {
+      if (!isUsingFallback && !isEmailListLoaded) {
         return { status: "error", message: "Database pengguna belum dimuat. Silakan coba lagi." };
       }
       
@@ -1400,7 +1563,7 @@
         return { status: "error", message: "Password saat ini salah." };
       }
       
-      // Update password in Google Sheets
+      // Update password
       if (!updateUserPassword(email, newPassword)) {
         return { status: "error", message: "Gagal memperbarui password. Silakan coba lagi." };
       }
@@ -1432,7 +1595,7 @@
       }
       
       // Load user database if not already loaded
-      if (!isEmailListLoaded) {
+      if (!isUsingFallback && !isEmailListLoaded) {
         if (!loadUserDatabase()) {
           showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
           // Store login data to try again after loading
@@ -1466,7 +1629,6 @@
         endTimer();
       }
       currentUser = null;
-      isGoogleAuthorized = false;
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('changePasswordContainer').classList.add('hidden');
       document.getElementById('authContainer').classList.remove('hidden');
@@ -1595,10 +1757,23 @@
     // --- GOOGLE SHEETS API FUNCTIONS ---
     function initializeGapi() {
       updateApiStatus('loading', 'Memuat Google API...');
+      apiInitStartTime = Date.now();
+      
+      // Set timeout for API initialization
+      initializationTimeout = setTimeout(() => {
+        if (!gapiInited) {
+          console.error('API initialization timeout');
+          updateApiStatus('disconnected', 'Timeout: API tidak merespon');
+          showRetryButton();
+        }
+      }, 10000); // 10 seconds timeout
+      
       gapi.load('client', initializeGapiClient);
     }
 
     function initializeGapiClient() {
+      clearTimeout(initializationTimeout);
+      
       gapi.client.init({
         apiKey: API_KEY,
         discoveryDocs: DISCOVERY_DOCS,
@@ -1610,19 +1785,27 @@
         console.error('Error initializing GAPI client:', error);
         updateApiStatus('disconnected', 'Error: ' + error.message);
         showRetryButton();
+        updateDebugInfo();
       });
     }
 
     function initializeGis() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '',
-      });
-      gisInited = true;
-      
-      // Load user database when everything is initialized
-      loadUserDatabase();
+      try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '',
+        });
+        gisInited = true;
+        
+        // Load user database when everything is initialized
+        loadUserDatabase();
+      } catch (error) {
+        console.error('Error initializing GIS:', error);
+        updateApiStatus('disconnected', 'Error GIS: ' + error.message);
+        showRetryButton();
+        updateDebugInfo();
+      }
     }
 
     function isEmailAllowed(email) {
@@ -1649,6 +1832,11 @@
     }
 
     function exportToGoogleSheets() {
+      if (isUsingFallback) {
+        showAppMessage('Mode offline tidak mendukung eksport ke Google Sheets', 'warning');
+        return;
+      }
+      
       if (!gapiInited || !gisInited) {
         showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
         return;
@@ -1685,7 +1873,7 @@
       }).then((response) => {
         showAppMessage(`Berhasil mengekspor ${history.length} data ke sheet "JAM IZIN KELUAR"`, 'success');
       }, (error) => {
-        showAppMessage('Error: ' + error.result.error.message, 'error');
+        showAppMessage('Error: ' + (error.result?.error?.message || error.message), 'error');
         console.error('Error exporting to Google Sheets:', error);
       });
     }
@@ -1714,211 +1902,6 @@
       if (savedState) {
         const state = JSON.parse(savedState);
         
-        // Check if user exists in Google Sheets
-        if (isEmailListLoaded && userData[state.userEmail]) {
-          currentUser = { email: state.userEmail, name: state.userName };
-          document.getElementById('welcomeMessage').textContent = `Selamat datang, ${currentUser.name}!`;
-          document.getElementById('authContainer').classList.add('hidden');
-          document.getElementById('appContainer').classList.remove('hidden');
-          loadAppState();
-          checkUnfinishedTimer();
-          showAppMessage(`Selamat datang kembali, ${currentUser.name}!`, 'success');
-          
-          // Auto-load history when session is restored
-          loadHistory();
-        } else {
-          clearAppState();
-        }
-      }
-    }
-
-    function checkUnfinishedTimer() {
-      if (!currentUser) return;
-      const unfinishedTimer = getUnfinishedTimer(currentUser.email);
-      if (unfinishedTimer) {
-        const [datePart, timePart] = unfinishedTimer.startTime.split(' ');
-        const [day, month, year] = datePart.split('/');
-        const [hours, minutes, seconds] = timePart.split(':');
-        startTime = new Date(year, month - 1, day, hours, minutes, seconds);
-        isTimerRunning = true;
-        timerInterval = setInterval(updateTimerDisplay, 1000);
-        document.getElementById('startBtn').disabled = true;
-        document.getElementById('endBtn').disabled = false;
-        const now = new Date();
-        const elapsed = now - startTime;
-        document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
-      }
-    }
-
-    // --- API Status Management ---
-    function updateApiStatus(status, message) {
-      const statusDot = document.getElementById('statusDot');
-      const statusText = document.getElementById('statusText');
-      
-      statusDot.className = 'status-dot';
-      
-      switch(status) {
-        case 'connected':
-          statusDot.classList.add('status-connected');
-          break;
-        case 'disconnected':
-          statusDot.classList.add('status-disconnected');
-          break;
-        case 'loading':
-        default:
-          statusDot.classList.add('status-loading');
-          break;
-      }
-      
-      statusText.textContent = message;
-    }
-
-    function enableAuthButtons() {
-      document.getElementById('loginBtn').disabled = false;
-      document.getElementById('registerBtn').disabled = false;
-    }
-
-    function showRetryButton() {
-      document.getElementById('retryInitBtn').classList.remove('hidden');
-      document.getElementById('loginBtn').classList.add('hidden');
-    }
-
-    function retryInitialization() {
-      initAttempts++;
-      if (initAttempts > MAX_INIT_ATTEMPTS) {
-        updateApiStatus('disconnected', 'Gagal menginisialisasi API setelah beberapa percobaan. Silakan refresh halaman.');
-        showAppMessage('Gagal menginisialisasi API. Silakan refresh halaman.', 'error');
-        return;
-      }
-      
-      updateApiStatus('loading', `Mencoba menginisialisasi ulang... (${initAttempts}/${MAX_INIT_ATTEMPTS})`);
-      document.getElementById('retryInitBtn').classList.add('hidden');
-      
-      // Reset flags
-      gapiInited = false;
-      gisInited = false;
-      isGoogleAuthorized = false;
-      
-      // Try to initialize again
-      setTimeout(() => {
-        initializeGapi();
-      }, 1000);
-    }
-
-    function checkPendingLogin() {
-      const pendingLogin = localStorage.getItem('pendingLogin');
-      if (pendingLogin) {
-        const { email, password } = JSON.parse(pendingLogin);
-        localStorage.removeItem('pendingLogin');
-        
-        // Fill the form and attempt login
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = password;
-        
-        // Show a message to the user
-        showAppMessage('Melanjutkan proses login...', 'success');
-        
-        // Attempt login after a short delay
-        setTimeout(() => {
-          login();
-        }, 1000);
-      }
-      
-      const pendingRegistration = localStorage.getItem('pendingRegistration');
-      if (pendingRegistration) {
-        const { email, name, password, confirmPassword } = JSON.parse(pendingRegistration);
-        localStorage.removeItem('pendingRegistration');
-        
-        // Fill the form and attempt registration
-        document.getElementById('registerEmail').value = email;
-        document.getElementById('registerName').value = name;
-        document.getElementById('registerPassword').value = password;
-        document.getElementById('confirmPassword').value = confirmPassword;
-        
-        // Show a message to the user
-        showAppMessage('Melanjutkan proses registrasi...', 'success');
-        
-        // Attempt registration after a short delay
-        setTimeout(() => {
-          register();
-        }, 1000);
-      }
-    }
-
-    // --- Create Floating Particles ---
-    function createParticles() {
-      const particlesContainer = document.getElementById('particlesContainer');
-      const particleCount = 20;
-      
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // Random size
-        const size = Math.random() * 5 + 2;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        // Random position
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        
-        // Random color
-        const colors = ['var(--primary-color)', 'var(--secondary-color)', 'var(--accent-color)'];
-        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        
-        // Random border radius (circle or square)
-        particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-        
-        // Random opacity
-        particle.style.opacity = Math.random() * 0.5 + 0.1;
-        
-        // Random animation duration
-        const duration = Math.random() * 20 + 10;
-        particle.style.animation = `float ${duration}s infinite ease-in-out`;
-        
-        particlesContainer.appendChild(particle);
-      }
-    }
-    
-    // --- Add Floating Animation ---
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes float {
-        0%, 100% { transform: translateY(0) translateX(0); }
-        25% { transform: translateY(-20px) translateX(10px); }
-        50% { transform: translateY(10px) translateX(-10px); }
-        75% { transform: translateY(-10px) translateX(20px); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    window.onload = function() {
-      createParticles();
-      setInterval(updateDigitalClock, 1000);
-      updateDigitalClock();
-      
-      initializeGapi();
-      
-      const loginPassword = document.getElementById('loginPassword');
-      const registerPassword = document.getElementById('registerPassword');
-      const confirmPassword = document.getElementById('confirmPassword');
-      const currentPassword = document.getElementById('currentPassword');
-      const newPassword = document.getElementById('newPassword');
-      const confirmNewPassword = document.getElementById('confirmNewPassword');
-
-      if(loginPassword) loginPassword.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
-      if(registerPassword) registerPassword.addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
-      if(confirmPassword) confirmPassword.addEventListener('keypress', e => { if (e.key === 'Enter') register(); });
-      if(currentPassword) currentPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
-      if(newPassword) newPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
-      if(confirmNewPassword) confirmNewPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
-    };
-
-    // Add event listener for when user database is loaded
-    document.addEventListener('userDatabaseLoaded', function() {
-      checkSession();
-    });
-  </script>
-</body>
-</html>
+        // Check if user exists in database
+        if ((isEmailListLoaded && userData[state.userEmail]) || isUsingFallback) {
+          currentUser = {
