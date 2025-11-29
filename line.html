@@ -188,11 +188,33 @@
       background: rgba(255, 255, 255, 0.5);
       transform: translate(-50%, -50%);
       transition: width 0.6s, height 0.6s;
+      z-index: 0;
+    }
+    
+    /* --- Button Press Effect --- */
+    button::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s ease;
+      z-index: 1;
     }
     
     button:active::before {
       width: 300px;
       height: 300px;
+    }
+    
+    button:active::after {
+      opacity: 1;
+      transform: scale(1);
     }
     
     button:hover {
@@ -208,6 +230,34 @@
       color: #333;
       transform: none;
       box-shadow: none;
+    }
+    
+    /* --- Special styling for timer buttons --- */
+    #startBtn, #endBtn {
+      position: relative;
+      z-index: 2;
+    }
+    
+    #startBtn span, #endBtn span {
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* --- Button glow animation when pressed --- */
+    @keyframes buttonGlow {
+      0% {
+        box-shadow: 0 0 5px var(--primary-color);
+      }
+      50% {
+        box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+      }
+      100% {
+        box-shadow: 0 0 5px var(--primary-color);
+      }
+    }
+    
+    .button-glow {
+      animation: buttonGlow 0.5s ease-in-out;
     }
     
     .logout-btn {
@@ -749,8 +799,8 @@
       </div>
       
       <div class="button-row">
-        <button id="startBtn" onclick="startTimer()"><i class="fas fa-play button-icon"></i> Start</button>
-        <button id="endBtn" onclick="endTimer()" disabled><i class="fas fa-stop button-icon"></i> End</button>
+        <button id="startBtn" onclick="startTimer()"><span><i class="fas fa-play button-icon"></i> Start</span></button>
+        <button id="endBtn" onclick="endTimer()" disabled><span><i class="fas fa-stop button-icon"></i> End</span></button>
       </div>
       
       <div id="historySection">
@@ -935,17 +985,30 @@
       startTime = new Date();
       isTimerRunning = true;
       timerInterval = setInterval(updateTimerDisplay, 1000);
-      document.getElementById('startBtn').disabled = true;
-      document.getElementById('endBtn').disabled = false;
+      
+      // Add visual feedback when button is pressed
+      const startBtn = document.getElementById('startBtn');
+      startBtn.classList.add('button-glow');
+      setTimeout(() => startBtn.classList.remove('button-glow'), 500);
+      
+      // Visual feedback for timer display
+      const timerDisplay = document.getElementById('timerDisplay');
+      timerDisplay.style.animation = 'pulse 0.5s';
+      setTimeout(() => timerDisplay.style.animation = '', 500);
+      
+      // Show notification
+      showAppMessage('Timer dimulai', 'success');
+      
+      // Don't disable the button immediately to maintain visual feedback
+      setTimeout(() => {
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('endBtn').disabled = false;
+      }, 300);
+      
       saveAppState();
       
       const activeSession = { email: currentUser.email, startTime: formatDateTime(startTime) };
       localStorage.setItem('activeSession', JSON.stringify(activeSession));
-      
-      // Visual feedback
-      const timerDisplay = document.getElementById('timerDisplay');
-      timerDisplay.style.animation = 'pulse 0.5s';
-      setTimeout(() => timerDisplay.style.animation = '', 500);
     }
 
     function endTimer() {
@@ -954,6 +1017,11 @@
       isTimerRunning = false;
       const endTime = new Date();
       const duration = endTime - startTime;
+      
+      // Add visual feedback when button is pressed
+      const endBtn = document.getElementById('endBtn');
+      endBtn.classList.add('button-glow');
+      setTimeout(() => endBtn.classList.remove('button-glow'), 500);
       
       const historyEntry = {
         email: currentUser.email,
@@ -971,15 +1039,22 @@
       saveAppState();
       
       document.getElementById('timerDisplay').textContent = '00:00:00';
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('endBtn').disabled = true;
+      
+      // Don't disable the button immediately to maintain visual feedback
+      setTimeout(() => {
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('endBtn').disabled = true;
+      }, 300);
       
       if (historyLoaded) loadHistory();
       
-      // Visual feedback
+      // Visual feedback for timer display
       const timerDisplay = document.getElementById('timerDisplay');
       timerDisplay.style.animation = 'pulse 0.5s';
       setTimeout(() => timerDisplay.style.animation = '', 500);
+      
+      // Show notification
+      showAppMessage('Timer dihentikan', 'success');
     }
 
     // --- TAB SWITCHING ---
