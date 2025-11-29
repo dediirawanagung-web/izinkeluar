@@ -797,7 +797,7 @@
         <div class="form-group">
           <label for="registerEmail">Email Gmail</label>
           <input type="email" id="registerEmail" required placeholder="nama.akun@gmail.com">
-          <div class="auth-status">Hanya alamat Gmail yang bisa digunakan untuk mendaftar</div>
+          <div class="auth-status">Hanya alamat Gmail yang terdaftar di sistem yang bisa digunakan</div>
         </div>
         <div class="form-group">
           <label for="registerName">Nama Lengkap</label>
@@ -920,10 +920,10 @@
     // --- KONFIGURASI GOOGLE SHEETS API ---
     const API_KEY = 'MASUKKAN_API_KEY_ANDA_DISINI';
     const CLIENT_ID = 'MASUKKAN_CLIENT_ID_ANDA_DISINI';
-    const SPREADSHEET_ID = 'MASUKKAN_SPREADSHEET_ID_KELUAR_AGUENG_DISINI';
+    const SPREADSHEET_ID = 'MASUKKAN_SPREADSHEET_ID_KELUAR_AGUENG_DISINI'; // Ganti dengan ID spreadsheet KELUAR AGUENG
     
     const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets'; // Ubah scope untuk bisa menulis
     
     let tokenClient;
     let gapiInited = false;
@@ -931,6 +931,7 @@
     let isGoogleAuthorized = false;
     let allowedEmails = [];
     let isEmailListLoaded = false;
+    let userData = {}; // Menyimpan data pengguna dari Google Sheets
 
     // --- VARIABEL GLOBAL ---
     let timerInterval;
@@ -1137,8 +1138,88 @@
       return email.toLowerCase().endsWith('@gmail.com');
     }
 
+    // --- FUNGSI UNTUK GOOGLE SHEETS ---
+    function loadUserDatabase() {
+      if (!gapiInited || !gisInited) {
+        showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
+        return;
+      }
+
+      if (!isGoogleAuthorized) {
+        handleAuthClick();
+        return;
+      }
+
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'JAM IZIN KELUAR!A:B',
+      }).then((response) => {
+        const rows = response.result.values;
+        if (rows && rows.length > 0) {
+          userData = {};
+          allowedEmails = [];
+          
+          for (let i = 0; i < rows.length; i++) {
+            if (rows[i][0]) { // Email di kolom A
+              const email = rows[i][0].trim().toLowerCase();
+              const password = rows[i][1] ? rows[i][1].trim() : '';
+              
+              userData[email] = {
+                password: password,
+                row: i + 1 // Simpan nomor baris untuk update nanti
+              };
+              
+              allowedEmails.push(email);
+            }
+          }
+          
+          isEmailListLoaded = true;
+          showAppMessage('Database pengguna berhasil dimuat', 'success');
+        } else {
+          showAppMessage('Tidak ada data pengguna di spreadsheet', 'error');
+        }
+      }, (error) => {
+        showAppMessage('Error: ' + error.result.error.message, 'error');
+        console.error('Error loading user database:', error);
+      });
+    }
+
+    function updateUserPassword(email, newPassword) {
+      if (!gapiInited || !gisInited) {
+        showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
+        return;
+      }
+
+      if (!isGoogleAuthorized) {
+        handleAuthClick();
+        return;
+      }
+
+      if (!userData[email]) {
+        showAppMessage('Email tidak ditemukan dalam database', 'error');
+        return;
+      }
+
+      const row = userData[email].row;
+      
+      gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `JAM IZIN KELUAR!B${row}`,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [[newPassword]]
+        }
+      }).then((response) => {
+        userData[email].password = newPassword;
+        showAppMessage('Password berhasil diperbarui di Google Sheets', 'success');
+      }, (error) => {
+        showAppMessage('Error: ' + error.result.error.message, 'error');
+        console.error('Error updating password:', error);
+      });
+    }
+
     function register() {
-      const email = document.getElementById('registerEmail').value.trim();
+      const email = document.getElementById('registerEmail').value.trim().toLowerCase();
       const name = document.getElementById('registerName').value.trim();
       const password = document.getElementById('registerPassword').value.trim();
       const confirmPassword = document.getElementById('confirmPassword').value.trim();
@@ -1164,14 +1245,35 @@
         return;
       }
       
-      const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
-      if (users[email]) {
+      // Load user database if not already loaded
+      if (!isEmailListLoaded) {
+        loadUserDatabase();
+        showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
+        
+        // Try again after a delay
+        setTimeout(() => {
+          register();
+        }, 3000);
+        return;
+      }
+      
+      // Check if email is in allowed list
+      if (!allowedEmails.includes(email)) {
+        showMessage(messageElement, 'Email tidak terdaftar dalam sistem. Hubungi administrator.', 'error');
+        return;
+      }
+      
+      // Check if user already has a password
+      if (userData[email] && userData[email].password) {
         showMessage(messageElement, 'Email sudah terdaftar. Silakan login atau gunakan email lain.', 'error');
         return;
       }
       
-      users[email] = { name, password };
-      localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
+      // Update password in Google Sheets
+      updateUserPassword(email, password);
+      
+      // Update local data
+      userData[email].password = password;
       
       showMessage(messageElement, 'Registrasi berhasil! Silakan login dengan akun Anda.', 'success');
       
@@ -1188,24 +1290,46 @@
       }, 2000);
     }
 
-    // --- LOGIKA AUTENTIKASI (STANDALONE) ---
+    // --- LOGIKA AUTENTIKASI (GOOGLE SHEETS) ---
     function loginUser(email, password) {
-      const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
-      const user = users[email];
-      if (user && user.password === password) {
-        return { status: "success", user: { email, name: user.name } };
+      if (!isEmailListLoaded) {
+        return { status: "error", message: "Database pengguna belum dimuat. Silakan coba lagi." };
       }
-      return { status: "error", message: "Email atau password salah." };
+      
+      if (!userData[email]) {
+        return { status: "error", message: "Email tidak terdaftar dalam sistem." };
+      }
+      
+      if (!userData[email].password) {
+        return { status: "error", message: "Email terdaftar tetapi belum memiliki password. Silakan daftar terlebih dahulu." };
+      }
+      
+      if (userData[email].password !== password) {
+        return { status: "error", message: "Email atau password salah." };
+      }
+      
+      // Extract name from email (you might want to store this in the Google Sheet instead)
+      const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
+      return { status: "success", user: { email, name } };
     }
 
     function changeUserPassword(email, currentPassword, newPassword) {
-      const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
-      const user = users[email];
-      if (!user || user.password !== currentPassword) {
+      if (!isEmailListLoaded) {
+        return { status: "error", message: "Database pengguna belum dimuat. Silakan coba lagi." };
+      }
+      
+      if (!userData[email]) {
+        return { status: "error", message: "Email tidak ditemukan dalam database." };
+      }
+      
+      if (userData[email].password !== currentPassword) {
         return { status: "error", message: "Password saat ini salah." };
       }
-      user.password = newPassword;
-      localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
+      
+      // Update password in Google Sheets
+      updateUserPassword(email, newPassword);
+      
       return { status: "success", message: "Password berhasil diubah." };
     }
 
@@ -1223,12 +1347,24 @@
     }
 
     function login() {
-      const email = document.getElementById('loginEmail').value.trim();
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const password = document.getElementById('loginPassword').value.trim();
       const messageElement = document.getElementById('loginMessage');
       
       if (!email || !password) {
         showMessage(messageElement, 'Email dan password harus diisi', 'error');
+        return;
+      }
+      
+      // Load user database if not already loaded
+      if (!isEmailListLoaded) {
+        loadUserDatabase();
+        showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
+        
+        // Try again after a delay
+        setTimeout(() => {
+          login();
+        }, 3000);
         return;
       }
       
@@ -1240,7 +1376,6 @@
         document.getElementById('appContainer').classList.remove('hidden');
         saveAppState();
         checkUnfinishedTimer();
-        initializeGapi();
         showAppMessage(`Selamat datang, ${currentUser.name}!`, 'success');
         
         // Auto-load history when user logs in
@@ -1406,10 +1541,13 @@
         callback: '',
       });
       gisInited = true;
+      
+      // Load user database when everything is initialized
+      loadUserDatabase();
     }
 
     function isEmailAllowed(email) {
-      return isGmail(email);
+      return isGmail(email) && allowedEmails.includes(email.toLowerCase());
     }
 
     function handleAuthClick() {
@@ -1419,7 +1557,7 @@
         }
         isGoogleAuthorized = true;
         showAppMessage('Berhasil terautentikasi dengan Google Sheets', 'success');
-        exportToGoogleSheets(); 
+        loadUserDatabase();
       };
 
       if (gapi.client.getToken() === null) {
@@ -1494,16 +1632,15 @@
       const savedState = localStorage.getItem(APP_STATE_KEY);
       if (savedState) {
         const state = JSON.parse(savedState);
-        const users = JSON.parse(localStorage.getItem(DB_USERS_KEY)) || {};
-        const user = users[state.userEmail];
-        if (user) {
+        
+        // Check if user exists in Google Sheets
+        if (isEmailListLoaded && userData[state.userEmail]) {
           currentUser = { email: state.userEmail, name: state.userName };
           document.getElementById('welcomeMessage').textContent = `Selamat datang, ${currentUser.name}!`;
           document.getElementById('authContainer').classList.add('hidden');
           document.getElementById('appContainer').classList.remove('hidden');
           loadAppState();
           checkUnfinishedTimer();
-          initializeGapi();
           showAppMessage(`Selamat datang kembali, ${currentUser.name}!`, 'success');
           
           // Auto-load history when session is restored
@@ -1581,16 +1718,11 @@
     document.head.appendChild(style);
 
     window.onload = function() {
-      initializeUserDatabase();
       createParticles();
       setInterval(updateDigitalClock, 1000);
       updateDigitalClock();
       
-      if (!localStorage.getItem(APP_STATE_KEY)) {
-        initializeGapi();
-      } else {
-        checkSession();
-      }
+      initializeGapi();
       
       const loginPassword = document.getElementById('loginPassword');
       const registerPassword = document.getElementById('registerPassword');
@@ -1607,12 +1739,10 @@
       if(confirmNewPassword) confirmNewPassword.addEventListener('keypress', e => { if (e.key === 'Enter') processChangePassword(); });
     };
 
-    function initializeUserDatabase() {
-        if (!localStorage.getItem(DB_USERS_KEY)) {
-            const defaultUsers = {};
-            localStorage.setItem(DB_USERS_KEY, JSON.stringify(defaultUsers));
-        }
-    }
+    // Add event listener for when user database is loaded
+    document.addEventListener('userDatabaseLoaded', function() {
+      checkSession();
+    });
   </script>
 </body>
 </html>
