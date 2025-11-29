@@ -1487,8 +1487,9 @@
         initializeGis();
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
-        const loginMsg = document.getElementById('loginMessage');
-        if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Fitur export mungkin tidak berfungsi.', 'error');
+        // Hapus baris ini agar tidak menampilkan pesan error saat refresh
+        // const loginMsg = document.getElementById('loginMessage');
+        // if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Fitur export mungkin tidak berfungsi.', 'error');
       });
     }
 
