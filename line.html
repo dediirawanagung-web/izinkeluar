@@ -755,6 +755,50 @@
     .history-table-container {
       overflow-x: auto;
     }
+    
+    /* --- API Status Indicator --- */
+    .api-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-connected {
+      background-color: var(--success-color);
+    }
+    
+    .status-disconnected {
+      background-color: var(--error-color);
+    }
+    
+    .status-loading {
+      background-color: var(--warning-color);
+      animation: pulse 1.5s infinite;
+    }
+    
+    /* --- Retry Button --- */
+    .retry-btn {
+      background-color: var(--warning-color);
+      color: #000;
+      margin-top: 10px;
+      font-size: 14px;
+      padding: 8px 16px;
+    }
+    
+    .retry-btn:hover {
+      background-color: #f59e0b;
+      box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -771,6 +815,12 @@
       <h1>LOGIN JAM IZIN KELUAR</h1>
       <div id="digitalClock"></div>
       
+      <!-- API Status Indicator -->
+      <div class="api-status">
+        <div id="statusDot" class="status-dot status-loading"></div>
+        <span id="statusText">Memuat Google API...</span>
+      </div>
+      
       <div class="tab-container">
         <div class="tab active" onclick="switchTab('login')">Login</div>
         <div class="tab" onclick="switchTab('register')">Daftar</div>
@@ -786,7 +836,10 @@
           <label for="loginPassword">Password</label>
           <input type="password" id="loginPassword" required placeholder="Masukkan password Anda">
         </div>
-        <button onclick="login()"><i class="fas fa-sign-in-alt button-icon"></i>Login</button>
+        <button id="loginBtn" onclick="login()" disabled><i class="fas fa-sign-in-alt button-icon"></i>Login</button>
+        <button id="retryInitBtn" class="retry-btn hidden" onclick="retryInitialization()">
+          <i class="fas fa-redo button-icon"></i>Coba Lagi
+        </button>
         <div class="switch-form">
           Gunakan alamat Gmail dan password yang telah Anda daftarkan
         </div>
@@ -812,7 +865,7 @@
           <label for="confirmPassword">Konfirmasi Password</label>
           <input type="password" id="confirmPassword" required placeholder="Ketik ulang password Anda">
         </div>
-        <button onclick="register()"><i class="fas fa-user-plus button-icon"></i>Daftar</button>
+        <button id="registerBtn" onclick="register()" disabled><i class="fas fa-user-plus button-icon"></i>Daftar</button>
         <div class="switch-form">
           Sudah punya akun? <a onclick="switchTab('login')">Login di sini</a>
         </div>
@@ -932,6 +985,8 @@
     let allowedEmails = [];
     let isEmailListLoaded = false;
     let userData = {}; // Menyimpan data pengguna dari Google Sheets
+    let initAttempts = 0;
+    const MAX_INIT_ATTEMPTS = 3;
 
     // --- VARIABEL GLOBAL ---
     let timerInterval;
@@ -1141,15 +1196,17 @@
     // --- FUNGSI UNTUK GOOGLE SHEETS ---
     function loadUserDatabase() {
       if (!gapiInited || !gisInited) {
-        showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
-        return;
+        updateApiStatus('loading', 'API belum siap. Silakan tunggu...');
+        return false;
       }
 
       if (!isGoogleAuthorized) {
         handleAuthClick();
-        return;
+        return false;
       }
 
+      updateApiStatus('loading', 'Memuat database pengguna...');
+      
       gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: 'JAM IZIN KELUAR!A:B',
@@ -1174,30 +1231,39 @@
           }
           
           isEmailListLoaded = true;
+          updateApiStatus('connected', 'Terhubung ke Google Sheets');
+          enableAuthButtons();
           showAppMessage('Database pengguna berhasil dimuat', 'success');
+          
+          // Check if user was trying to login before API was ready
+          checkPendingLogin();
         } else {
+          updateApiStatus('disconnected', 'Tidak ada data pengguna di spreadsheet');
           showAppMessage('Tidak ada data pengguna di spreadsheet', 'error');
         }
       }, (error) => {
+        updateApiStatus('disconnected', 'Error: ' + error.result.error.message);
         showAppMessage('Error: ' + error.result.error.message, 'error');
         console.error('Error loading user database:', error);
       });
+      
+      return true;
     }
 
     function updateUserPassword(email, newPassword) {
       if (!gapiInited || !gisInited) {
         showAppMessage('Google API belum dimuat. Silakan coba lagi.', 'error');
-        return;
+        return false;
       }
 
       if (!isGoogleAuthorized) {
         handleAuthClick();
-        return;
+        return false;
       }
 
       if (!userData[email]) {
         showAppMessage('Email tidak ditemukan dalam database', 'error');
-        return;
+        return false;
       }
 
       const row = userData[email].row;
@@ -1212,10 +1278,14 @@
       }).then((response) => {
         userData[email].password = newPassword;
         showAppMessage('Password berhasil diperbarui di Google Sheets', 'success');
+        return true;
       }, (error) => {
         showAppMessage('Error: ' + error.result.error.message, 'error');
         console.error('Error updating password:', error);
+        return false;
       });
+      
+      return true;
     }
 
     function register() {
@@ -1247,14 +1317,14 @@
       
       // Load user database if not already loaded
       if (!isEmailListLoaded) {
-        loadUserDatabase();
-        showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
-        
-        // Try again after a delay
-        setTimeout(() => {
-          register();
-        }, 3000);
-        return;
+        if (!loadUserDatabase()) {
+          showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
+          // Store registration data to try again after loading
+          localStorage.setItem('pendingRegistration', JSON.stringify({
+            email, name, password, confirmPassword
+          }));
+          return;
+        }
       }
       
       // Check if email is in allowed list
@@ -1270,7 +1340,10 @@
       }
       
       // Update password in Google Sheets
-      updateUserPassword(email, password);
+      if (!updateUserPassword(email, password)) {
+        showMessage(messageElement, 'Gagal memperbarui password. Silakan coba lagi.', 'error');
+        return;
+      }
       
       // Update local data
       userData[email].password = password;
@@ -1328,7 +1401,9 @@
       }
       
       // Update password in Google Sheets
-      updateUserPassword(email, newPassword);
+      if (!updateUserPassword(email, newPassword)) {
+        return { status: "error", message: "Gagal memperbarui password. Silakan coba lagi." };
+      }
       
       return { status: "success", message: "Password berhasil diubah." };
     }
@@ -1358,14 +1433,14 @@
       
       // Load user database if not already loaded
       if (!isEmailListLoaded) {
-        loadUserDatabase();
-        showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
-        
-        // Try again after a delay
-        setTimeout(() => {
-          login();
-        }, 3000);
-        return;
+        if (!loadUserDatabase()) {
+          showMessage(messageElement, 'Memuat database pengguna. Silakan tunggu...', 'success');
+          // Store login data to try again after loading
+          localStorage.setItem('pendingLogin', JSON.stringify({
+            email, password
+          }));
+          return;
+        }
       }
       
       const response = loginUser(email, password);
@@ -1519,6 +1594,7 @@
 
     // --- GOOGLE SHEETS API FUNCTIONS ---
     function initializeGapi() {
+      updateApiStatus('loading', 'Memuat Google API...');
       gapi.load('client', initializeGapiClient);
     }
 
@@ -1528,9 +1604,12 @@
         discoveryDocs: DISCOVERY_DOCS,
       }).then(() => {
         gapiInited = true;
+        updateApiStatus('loading', 'Google API siap, memulai autentikasi...');
         initializeGis();
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
+        updateApiStatus('disconnected', 'Error: ' + error.message);
+        showRetryButton();
       });
     }
 
@@ -1551,11 +1630,13 @@
     }
 
     function handleAuthClick() {
+      updateApiStatus('loading', 'Meminta izin akses Google Sheets...');
       tokenClient.callback = async (resp) => {
         if (resp.error !== undefined) {
           throw (resp);
         }
         isGoogleAuthorized = true;
+        updateApiStatus('connected', 'Terhubung ke Google Sheets');
         showAppMessage('Berhasil terautentikasi dengan Google Sheets', 'success');
         loadUserDatabase();
       };
@@ -1666,6 +1747,101 @@
         const now = new Date();
         const elapsed = now - startTime;
         document.getElementById('timerDisplay').textContent = formatDuration(elapsed);
+      }
+    }
+
+    // --- API Status Management ---
+    function updateApiStatus(status, message) {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      
+      statusDot.className = 'status-dot';
+      
+      switch(status) {
+        case 'connected':
+          statusDot.classList.add('status-connected');
+          break;
+        case 'disconnected':
+          statusDot.classList.add('status-disconnected');
+          break;
+        case 'loading':
+        default:
+          statusDot.classList.add('status-loading');
+          break;
+      }
+      
+      statusText.textContent = message;
+    }
+
+    function enableAuthButtons() {
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('registerBtn').disabled = false;
+    }
+
+    function showRetryButton() {
+      document.getElementById('retryInitBtn').classList.remove('hidden');
+      document.getElementById('loginBtn').classList.add('hidden');
+    }
+
+    function retryInitialization() {
+      initAttempts++;
+      if (initAttempts > MAX_INIT_ATTEMPTS) {
+        updateApiStatus('disconnected', 'Gagal menginisialisasi API setelah beberapa percobaan. Silakan refresh halaman.');
+        showAppMessage('Gagal menginisialisasi API. Silakan refresh halaman.', 'error');
+        return;
+      }
+      
+      updateApiStatus('loading', `Mencoba menginisialisasi ulang... (${initAttempts}/${MAX_INIT_ATTEMPTS})`);
+      document.getElementById('retryInitBtn').classList.add('hidden');
+      
+      // Reset flags
+      gapiInited = false;
+      gisInited = false;
+      isGoogleAuthorized = false;
+      
+      // Try to initialize again
+      setTimeout(() => {
+        initializeGapi();
+      }, 1000);
+    }
+
+    function checkPendingLogin() {
+      const pendingLogin = localStorage.getItem('pendingLogin');
+      if (pendingLogin) {
+        const { email, password } = JSON.parse(pendingLogin);
+        localStorage.removeItem('pendingLogin');
+        
+        // Fill the form and attempt login
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = password;
+        
+        // Show a message to the user
+        showAppMessage('Melanjutkan proses login...', 'success');
+        
+        // Attempt login after a short delay
+        setTimeout(() => {
+          login();
+        }, 1000);
+      }
+      
+      const pendingRegistration = localStorage.getItem('pendingRegistration');
+      if (pendingRegistration) {
+        const { email, name, password, confirmPassword } = JSON.parse(pendingRegistration);
+        localStorage.removeItem('pendingRegistration');
+        
+        // Fill the form and attempt registration
+        document.getElementById('registerEmail').value = email;
+        document.getElementById('registerName').value = name;
+        document.getElementById('registerPassword').value = password;
+        document.getElementById('confirmPassword').value = confirmPassword;
+        
+        // Show a message to the user
+        showAppMessage('Melanjutkan proses registrasi...', 'success');
+        
+        // Attempt registration after a short delay
+        setTimeout(() => {
+          register();
+        }, 1000);
       }
     }
 
