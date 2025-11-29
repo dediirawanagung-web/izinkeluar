@@ -139,7 +139,7 @@
     }
     
     #timerDisplay {
-      font-size: 32px;
+      font-size: 38px; /* Increased size since we removed seconds */
       font-family: 'Orbitron', 'Courier New', monospace;
       margin: 25px 0;
       color: var(--secondary-color);
@@ -391,7 +391,7 @@
     }
     
     #historyContainer {
-      max-height: 500px;
+      max-height: 400px; /* Reduced height for simpler look */
       overflow-y: auto;
       margin: 20px 0;
       border: 1px solid var(--border-color);
@@ -595,7 +595,7 @@
       .container { padding: 20px; }
       h1 { font-size: 24px; }
       #digitalClock, #digitalClockApp { font-size: 32px; }
-      #timerDisplay { font-size: 28px; }
+      #timerDisplay { font-size: 32px; }
     }
     
     /* --- Animations --- */
@@ -734,7 +734,7 @@
     
     .history-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       margin-bottom: 15px;
     }
@@ -750,39 +750,6 @@
     .history-title i {
       margin-right: 10px;
       color: var(--primary-color);
-    }
-    
-    .history-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .history-actions button {
-      padding: 8px 12px;
-      font-size: 14px;
-      flex: initial;
-    }
-    
-    .summary-card {
-      background-color: var(--card-bg-hover);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-left: 5px solid var(--secondary-color);
-    }
-    
-    .summary-title {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    .summary-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--secondary-color);
     }
     
     .history-table-container {
@@ -859,7 +826,7 @@
       
       <div class="timer-container">
         <div class="timer-ring"></div>
-        <div id="timerDisplay">00:00:00</div>
+        <div id="timerDisplay">00:00</div>
       </div>
       
       <div class="button-row">
@@ -867,20 +834,12 @@
         <button id="endBtn" onclick="endTimer()" disabled><span><i class="fas fa-stop button-icon"></i> End</span></button>
       </div>
       
-      <!-- History Section - Now displayed by default -->
+      <!-- Simplified History Section -->
       <div id="historySection" class="history-section">
         <div class="history-header">
           <div class="history-title">
             <i class="fas fa-history"></i>
-            <span>History Durasi Izin Keluar</span>
-          </div>
-          <div class="history-actions">
-            <button onclick="printHistory()" style="background-color: var(--secondary-color); color: white;">
-              <i class="fas fa-print button-icon"></i> Cetak
-            </button>
-            <button onclick="exportToGoogleSheets()" class="export-btn">
-              <i class="fas fa-file-export button-icon"></i> Export
-            </button>
+            <span>History Izin Keluar</span>
           </div>
         </div>
         
@@ -985,8 +944,8 @@
       const totalSeconds = Math.floor(ms / 1000);
       const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
       const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-      const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-      return `${hours}:${minutes}:${seconds}`;
+      // Removed seconds display
+      return `${hours}:${minutes}`;
     }
 
     function formatDateTime(date) {
@@ -1119,7 +1078,7 @@
       localStorage.removeItem('activeSession');
       saveAppState();
       
-      document.getElementById('timerDisplay').textContent = '00:00:00';
+      document.getElementById('timerDisplay').textContent = '00:00';
       
       // Don't disable the button immediately to maintain visual feedback
       setTimeout(() => {
@@ -1308,7 +1267,7 @@
       showAppMessage('Anda telah keluar dari sistem', 'success');
     }
 
-    // --- LOGIKA HISTORY & DASHBOARD (DIMODIFIKASI) ---
+    // --- SIMPLIFIED LOGIKA HISTORY ---
     function loadHistory() {
       if (!currentUser) return;
       const history = getUserHistory(currentUser.email);
@@ -1318,32 +1277,7 @@
       if (history.length === 0) {
         historyContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Tidak ada history izin keluar</p>';
       } else {
-        // Calculate total duration
-        const totalDurationMs = history.reduce((total, item) => {
-          if (item.duration) {
-            const [h, m, s] = item.duration.split(':').map(Number);
-            return total + h * 3600 + m * 60 + s;
-          }
-          return total;
-        }, 0);
-        
-        const totalHours = Math.floor(totalDurationMs / 3600);
-        const totalMinutes = Math.floor((totalDurationMs % 3600) / 60);
-        const formattedTotalDuration = `${totalHours} Jam ${totalMinutes} Menit`;
-        
-        // Create summary card
-        const summaryCard = document.createElement('div');
-        summaryCard.className = 'summary-card';
-        summaryCard.innerHTML = `
-          <div class="summary-title">Total Durasi Izin Keluar</div>
-          <div class="summary-value">${formattedTotalDuration}</div>
-          <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
-            Berdasarkan ${history.length} catatan
-          </div>
-        `;
-        historyContainer.appendChild(summaryCard);
-        
-        // Create history table
+        // Create simple history table without summary card
         const tableContainer = document.createElement('div');
         tableContainer.className = 'history-table-container';
         
@@ -1373,31 +1307,6 @@
       
       historyContainer.classList.remove('hidden');
       historyLoaded = true;
-    }
-
-    function printHistory() {
-      const history = getUserHistory(currentUser.email);
-      document.getElementById('printUserName').textContent = currentUser.name;
-      document.getElementById('printDate').textContent = new Date().toLocaleString('id-ID');
-      const printBody = document.getElementById('printHistoryBody'); printBody.innerHTML = '';
-      
-      if (history.length > 0) {
-        history.slice().reverse().forEach((item, index) => {
-          const row = document.createElement('tr');
-          const date = item.startTime.split(' ')[0];
-          const startTime = item.startTime.split(' ')[1];
-          const endTime = item.endTime.split(' ')[1];
-          row.innerHTML = `<td>${index + 1}</td><td>${date}</td><td>${startTime}</td><td>${endTime}</td><td>${item.duration}</td>`;
-          printBody.appendChild(row);
-        });
-      } else {
-        printBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Tidak ada data history</td></tr>';
-      }
-      
-      const printContainer = document.getElementById('printContainer');
-      printContainer.style.display = 'block';
-      window.print();
-      printContainer.style.display = 'none';
     }
 
     // --- LOGIKA GANTI PASSWORD ---
@@ -1487,9 +1396,6 @@
         initializeGis();
       }, (error) => {
         console.error('Error initializing GAPI client:', error);
-        // Hapus baris ini agar tidak menampilkan pesan error saat refresh
-        // const loginMsg = document.getElementById('loginMessage');
-        // if(loginMsg) showMessage(loginMsg, 'Gagal memuat Google API. Fitur export mungkin tidak berfungsi.', 'error');
       });
     }
 
